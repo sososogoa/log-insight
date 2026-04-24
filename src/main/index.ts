@@ -2,6 +2,8 @@ import { app, BrowserWindow, shell } from 'electron'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { join } from 'path'
 import { registerIpcHandlers } from './ipc/register'
+import { disposeAll } from './pty/pty-manager'
+import { stopAllStreams } from './ssh/log-stream'
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -50,6 +52,13 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('will-quit', (e) => {
+  e.preventDefault()
+  stopAllStreams()
+  disposeAll()
+  app.exit(0)
 })
 
 app.on('window-all-closed', () => {

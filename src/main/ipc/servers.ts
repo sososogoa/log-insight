@@ -43,7 +43,10 @@ async function writeStore(list: ServerProfile[]): Promise<void> {
     ...p,
     ...(p.password !== undefined && { password: encryptField(p.password) })
   }))
-  await fs.writeFile(storePath(), JSON.stringify(encrypted, null, 2), 'utf8')
+  const target = storePath()
+  const tmp = target + '.tmp'
+  await fs.writeFile(tmp, JSON.stringify(encrypted, null, 2), 'utf8')
+  await fs.rename(tmp, target)
 }
 
 export async function listServers(): Promise<ServerProfile[]> {

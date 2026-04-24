@@ -47,8 +47,11 @@ export function createPtySession(
   }
 }
 
-export function writePty(id: string, data: string): void {
-  sessions.get(id)?.proc.write(data)
+export function writePty(id: string, data: string): boolean {
+  const entry = sessions.get(id)
+  if (!entry) return false
+  entry.proc.write(data)
+  return true
 }
 
 export function resizePty(id: string, cols: number, rows: number): void {
@@ -58,10 +61,13 @@ export function resizePty(id: string, cols: number, rows: number): void {
 export function disposePty(id: string): void {
   const entry = sessions.get(id)
   if (!entry) return
-  try {
-    entry.proc.kill()
-  } catch {
-    /* noop */
-  }
+  try { entry.proc.kill() } catch { /* noop */ }
   sessions.delete(id)
+}
+
+export function disposeAll(): void {
+  for (const entry of sessions.values()) {
+    try { entry.proc.kill() } catch { /* noop */ }
+  }
+  sessions.clear()
 }
