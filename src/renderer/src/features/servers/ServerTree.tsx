@@ -9,6 +9,7 @@ export function ServerTree(): JSX.Element {
   const { sources, subscribe, unsubscribe } = useSourcesStore()
   const [showForm, setShowForm] = useState(false)
   const [pathInputs, setPathInputs] = useState<Record<string, string>>({})
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loaded) void load()
@@ -17,6 +18,15 @@ export function ServerTree(): JSX.Element {
   async function handleSave(profile: ServerProfile): Promise<void> {
     await save(profile)
     setShowForm(false)
+  }
+
+  async function handleRemove(serverId: string): Promise<void> {
+    const serverSrcs = sources.filter((s) => s.serverId === serverId)
+    for (const src of serverSrcs) {
+      await unsubscribe(src.sourceId)
+    }
+    await remove(serverId)
+    setConfirmDelete(null)
   }
 
   function handleConnect(server: ServerProfile): void {
@@ -96,13 +106,33 @@ export function ServerTree(): JSX.Element {
                   ▶
                 </button>
                 <button
-                  onClick={() => remove(server.id)}
+                  onClick={() => setConfirmDelete(server.id)}
                   className="text-neutral-600 hover:text-red-400 mt-0.5 text-[11px] shrink-0 px-0.5"
                   title="Remove"
                 >
                   ×
                 </button>
               </div>
+
+              {confirmDelete === server.id && (
+                <div className="px-3 pb-1.5 flex items-center gap-2">
+                  <span className="text-[11px] text-neutral-400 flex-1 truncate">
+                    Delete <span className="text-neutral-200">{server.name}</span>?
+                  </span>
+                  <button
+                    onClick={() => void handleRemove(server.id)}
+                    className="text-[10px] px-1.5 py-0.5 rounded bg-red-900/60 hover:bg-red-800/70 text-red-300 transition-colors shrink-0"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(null)}
+                    className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors shrink-0"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
 
               {hasPathPrompt && (
                 <form

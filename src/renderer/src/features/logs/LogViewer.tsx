@@ -21,6 +21,7 @@ export function LogViewer(): JSX.Element {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [editingInstruction, setEditingInstruction] = useState(false)
   const [draftInstruction, setDraftInstruction] = useState(instruction)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const offLine = window.api.logs.onLine((line) => append(line))
@@ -32,6 +33,24 @@ export function LogViewer(): JSX.Element {
       offError()
     }
   }, [append, setError])
+
+  useEffect(() => {
+    if (selected.size === 0) return
+    function onKeyDown(e: KeyboardEvent): void {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
+        const text = lines
+          .filter((l) => selected.has(l.id))
+          .map((l) => l.text)
+          .join('\n')
+        void navigator.clipboard.writeText(text).then(() => {
+          setCopied(true)
+          setTimeout(() => setCopied(false), 1500)
+        })
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [selected, lines])
 
   const visible = useMemo(
     () => lines.filter((l) => applyFilters(l, filters, levelFilter)),
@@ -68,6 +87,23 @@ export function LogViewer(): JSX.Element {
         {selected.size > 0 && (
           <>
             <span className="text-neutral-300 shrink-0">{selected.size} selected</span>
+
+            <button
+              onClick={() => {
+                const text = lines
+                  .filter((l) => selected.has(l.id))
+                  .map((l) => l.text)
+                  .join('\n')
+                void navigator.clipboard.writeText(text).then(() => {
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 1500)
+                })
+              }}
+              className="px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 text-[11px] hover:bg-neutral-700 shrink-0 transition-colors"
+              title="Copy selected lines (⌘C)"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
 
             {editingInstruction ? (
               <input
