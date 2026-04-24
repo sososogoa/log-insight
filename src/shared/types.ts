@@ -27,7 +27,6 @@ export interface LogLine {
   timestamp: number
   level: LogLevel
   text: string
-  raw: string
 }
 
 export interface FilterRule {

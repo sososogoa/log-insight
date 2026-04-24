@@ -21,6 +21,7 @@ const stopped = new Set<string>()
 
 const MAX_RETRIES = 6
 const BASE_DELAY_MS = 1500
+const BATCH_FLUSH_MS = 16
 
 function detectLevel(line: string): LogLevel {
   const m = /\b(TRACE|DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL|SEVERE)\b/i.exec(line)
@@ -67,6 +68,7 @@ function scheduleReconnect(
   if (stopped.has(sourceId)) return
   if (attempt > MAX_RETRIES) {
     stopped.add(sourceId)
+    setTimeout(() => stopped.delete(sourceId), 60_000)
     active.delete(sourceId)
     sender.send(Channels.LogsError, {
       sourceId,
@@ -121,21 +123,34 @@ async function connectAndStream(
     }
 
     let buf = ''
+    let pending: LogLine[] = []
+    let flushTimer: NodeJS.Timeout | null = null
+
+    function flush(): void {
+      flushTimer = null
+      if (pending.length === 0) return
+      const batch = pending
+      pending = []
+      sender.send(Channels.LogsLineBatch, batch)
+    }
+
     stream.on('data', (data: Buffer) => {
       buf += data.toString('utf8')
       const lines = buf.split('\n')
       buf = lines.pop() ?? ''
+      const now = Date.now()
       for (const text of lines) {
         if (stopped.has(sourceId)) return
-        const line: LogLine = {
+        pending.push({
           id: randomUUID(),
           sourceId,
-          timestamp: Date.now(),
+          timestamp: now,
           level: detectLevel(text),
-          text,
-          raw: text
-        }
-        sender.send(Channels.LogsLine, line)
+          text
+        })
+      }
+      if (pending.length > 0 && !flushTimer) {
+        flushTimer = setTimeout(flush, BATCH_FLUSH_MS)
       }
     })
 
@@ -145,6 +160,7 @@ async function connectAndStream(
     })
 
     stream.on('close', () => {
+      if (flushTimer) { clearTimeout(flushTimer); flush() }
       client.end()
       scheduleReconnect(payload, sourceId, sender, attempt + 1, 'stream closed')
     })
@@ -165,9 +181,16 @@ export async function createSshLogStream(
 
 export function stopLogStream(sourceId: string): void {
   stopped.add(sourceId)
+  setTimeout(() => stopped.delete(sourceId), 60_000)
   const entry = active.get(sourceId)
   if (entry?.client) {
     try { entry.client.end() } catch { /* noop */ }
   }
   active.delete(sourceId)
+}
+
+export function stopAllStreams(): void {
+  for (const sourceId of active.keys()) {
+    stopLogStream(sourceId)
+  }
 }

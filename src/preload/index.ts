@@ -26,6 +26,11 @@ const api = {
       ipcRenderer.on(Channels.LogsLine, handler)
       return () => ipcRenderer.off(Channels.LogsLine, handler)
     },
+    onLineBatch: (cb: (lines: LogLine[]) => void): (() => void) => {
+      const handler = (_: unknown, lines: LogLine[]): void => cb(lines)
+      ipcRenderer.on(Channels.LogsLineBatch, handler)
+      return () => ipcRenderer.off(Channels.LogsLineBatch, handler)
+    },
     onError: (
       cb: (err: { sourceId: string; message: string }) => void
     ): (() => void) => {

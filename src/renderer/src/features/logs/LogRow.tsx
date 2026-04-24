@@ -7,7 +7,7 @@ interface Props {
   onSelect: (e: React.MouseEvent) => void
 }
 
-export function LogRow({ line, selected, onSelect }: Props): JSX.Element {
+function LogRowInner({ line, selected, onSelect }: Props): JSX.Element {
   const levelClass =
     line.level === 'error'
       ? 'log-row--error'
@@ -21,7 +21,6 @@ export function LogRow({ line, selected, onSelect }: Props): JSX.Element {
 
   return (
     <div className={`log-row ${levelClass} ${selected ? 'bg-blue-950/40' : 'hover:bg-neutral-900/50'}`}>
-      {/* 게터: 선택 전용 영역 */}
       <div
         onClick={onSelect}
         onMouseDown={(e) => { if (e.shiftKey) e.preventDefault() }}
@@ -36,11 +35,13 @@ export function LogRow({ line, selected, onSelect }: Props): JSX.Element {
           }`}
         />
       </div>
-
-      {/* 텍스트: 드래그 선택 자유 */}
       <span className="flex-1 pr-3 select-text break-all whitespace-pre-wrap cursor-text">
         {line.text}
       </span>
     </div>
   )
 }
+
+export const LogRow = React.memo(LogRowInner, (prev, next) =>
+  prev.selected === next.selected && prev.line.id === next.line.id
+)

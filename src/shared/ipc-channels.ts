@@ -6,6 +6,7 @@ export const Channels = {
   LogsSubscribe: 'logs:subscribe',
   LogsUnsubscribe: 'logs:unsubscribe',
   LogsLine: 'logs:line',
+  LogsLineBatch: 'logs:line-batch',
   LogsError: 'logs:error',
 
   TerminalCreate: 'terminal:create',

@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type React from 'react'
-import { applyFilters, useLogsStore } from '@renderer/store/logs'
+import { useVirtualizer } from '@tanstack/react-virtual'
+import { buildFilterPredicate, useLogsStore } from '@renderer/store/logs'
 import { useSourcesStore } from '@renderer/store/sources'
 import { useTerminalStore } from '@renderer/store/terminal'
 import { LogRow } from './LogRow'
 
-function isNearBottom(el: HTMLDivElement, threshold = 60): boolean {
+const MAX_AI_LINES = 300
+
+function isNearBottom(el: HTMLDivElement, threshold = 80): boolean {
   return el.scrollHeight - el.scrollTop - el.clientHeight < threshold
 }
 
@@ -15,7 +18,7 @@ export function LogViewer(): JSX.Element {
     filters,
     levelFilter,
     instruction,
-    append,
+    appendBatch,
     selected,
     toggleSelect,
     selectRange,
@@ -23,6 +26,11 @@ export function LogViewer(): JSX.Element {
     setInstruction
   } = useLogsStore()
   const anchorIdRef = useRef<string | null>(null)
+  const selectedRef = useRef(selected)
+  selectedRef.current = selected
+  const linesRef = useRef(lines)
+  linesRef.current = lines
+
   const { setError } = useSourcesStore()
   const activeTerminalId = useTerminalStore((s) => s.activeId)
   const requestExpand = useTerminalStore((s) => s.requestExpand)
@@ -32,26 +40,27 @@ export function LogViewer(): JSX.Element {
   const [draftInstruction, setDraftInstruction] = useState(instruction)
   const [copied, setCopied] = useState(false)
   const [sent, setSent] = useState(false)
+  const [sendError, setSendError] = useState('')
 
   useEffect(() => {
-    const offLine = window.api.logs.onLine((line) => append(line))
+    const offBatch = window.api.logs.onLineBatch((batch) => appendBatch(batch))
+    const offLine = window.api.logs.onLine((line) => appendBatch([line]))
     const offError = window.api.logs.onError(({ sourceId, message }) =>
       setError(sourceId, message)
     )
     return () => {
+      offBatch()
       offLine()
       offError()
     }
-  }, [append, setError])
+  }, [appendBatch, setError])
 
   useEffect(() => {
-    if (selected.size === 0) return
     function onKeyDown(e: KeyboardEvent): void {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
-        const text = lines
-          .filter((l) => selected.has(l.id))
-          .map((l) => l.text)
-          .join('\n')
+      const sel = selectedRef.current
+      if ((e.metaKey || e.ctrlKey) && e.key === 'c' && sel.size > 0) {
+        const ls = linesRef.current
+        const text = ls.filter((l) => sel.has(l.id)).map((l) => l.text).join('\n')
         void navigator.clipboard.writeText(text).then(() => {
           setCopied(true)
           setTimeout(() => setCopied(false), 1500)
@@ -60,18 +69,28 @@ export function LogViewer(): JSX.Element {
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [selected, lines])
+  }, [])
 
+  const predicate = useMemo(
+    () => buildFilterPredicate(filters),
+    [filters]
+  )
   const visible = useMemo(
-    () => lines.filter((l) => applyFilters(l, filters, levelFilter)),
-    [lines, filters, levelFilter]
+    () => lines.filter((l) => predicate(l, levelFilter)),
+    [lines, predicate, levelFilter]
   )
 
+  const virtualizer = useVirtualizer({
+    count: visible.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 22,
+    overscan: 15
+  })
+
   useEffect(() => {
-    const el = scrollRef.current
-    if (!el || !autoScrollRef.current || selected.size > 0) return
-    el.scrollTop = el.scrollHeight
-  }, [visible.length, selected.size])
+    if (!autoScrollRef.current || selected.size > 0 || visible.length === 0) return
+    virtualizer.scrollToIndex(visible.length - 1, { align: 'end' })
+  }, [visible.length, selected.size, virtualizer])
 
   function handleScroll(): void {
     const el = scrollRef.current
@@ -79,29 +98,40 @@ export function LogViewer(): JSX.Element {
     autoScrollRef.current = isNearBottom(el)
   }
 
-  function handleRowClick(id: string, e: React.MouseEvent): void {
+  const handleRowClick = useCallback((id: string, e: React.MouseEvent): void => {
     if (e.shiftKey && anchorIdRef.current !== null) {
-      const anchorIdx = visible.findIndex((l) => l.id === anchorIdRef.current)
-      const currentIdx = visible.findIndex((l) => l.id === id)
+      const visibleNow = linesRef.current
+      const anchorIdx = visibleNow.findIndex((l) => l.id === anchorIdRef.current)
+      const currentIdx = visibleNow.findIndex((l) => l.id === id)
       if (anchorIdx !== -1 && currentIdx !== -1) {
         const [from, to] =
           anchorIdx <= currentIdx ? [anchorIdx, currentIdx] : [currentIdx, anchorIdx]
-        selectRange(visible.slice(from, to + 1).map((l) => l.id))
+        selectRange(visibleNow.slice(from, to + 1).map((l) => l.id))
         return
       }
     }
     anchorIdRef.current = id
     toggleSelect(id)
-  }
+  }, [selectRange, toggleSelect])
 
   async function sendSelectionToAi(): Promise<void> {
     if (!activeTerminalId || selected.size === 0) return
-    const chosen = lines.filter((l) => selected.has(l.id)).map((l) => l.text)
-    await window.api.aiBridge.send({
+    const chosen = linesRef.current.filter((l) => selected.has(l.id)).map((l) => l.text)
+    if (chosen.length > MAX_AI_LINES) {
+      const ok = window.confirm(`${chosen.length}개 라인을 전송합니다 (처음 ${MAX_AI_LINES}개만 사용). 계속할까요?`)
+      if (!ok) return
+    }
+    const payload = chosen.slice(0, MAX_AI_LINES).join('\n')
+    const result = await window.api.aiBridge.send({
       terminalId: activeTerminalId,
       instruction,
-      payload: chosen.join('\n')
+      payload
     })
+    if (!result.ok) {
+      setSendError('전송 실패: 터미널 세션을 찾을 수 없습니다')
+      setTimeout(() => setSendError(''), 3000)
+      return
+    }
     clearSelection()
     requestExpand()
     setSent(true)
@@ -130,8 +160,8 @@ export function LogViewer(): JSX.Element {
 
             <button
               onClick={() => {
-                const text = lines
-                  .filter((l) => selected.has(l.id))
+                const text = linesRef.current
+                  .filter((l) => selectedRef.current.has(l.id))
                   .map((l) => l.text)
                   .join('\n')
                 void navigator.clipboard.writeText(text).then(() => {
@@ -173,35 +203,58 @@ export function LogViewer(): JSX.Element {
               </button>
             )}
 
-            <button
-              onClick={sendSelectionToAi}
-              className={`px-2 py-0.5 rounded text-[11px] shrink-0 transition-colors ${
-                sent
-                  ? 'bg-green-700/60 text-green-300'
-                  : 'bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-40'
-              }`}
-              disabled={!activeTerminalId}
-              title={
-                !activeTerminalId
-                  ? '터미널 탭을 먼저 열어주세요'
-                  : '터미널에서 claude (또는 다른 AI CLI)를 실행한 뒤 전송하세요'
-              }
-            >
-              {sent ? '전송됨 ✓' : '🤖 Ask AI'}
-            </button>
+            {sendError ? (
+              <span className="text-[11px] text-red-400 shrink-0">{sendError}</span>
+            ) : (
+              <button
+                onClick={sendSelectionToAi}
+                className={`px-2 py-0.5 rounded text-[11px] shrink-0 transition-colors ${
+                  sent
+                    ? 'bg-green-700/60 text-green-300'
+                    : 'bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-40'
+                }`}
+                disabled={!activeTerminalId}
+                title={
+                  !activeTerminalId
+                    ? '터미널 탭을 먼저 열어주세요'
+                    : '터미널에서 claude (또는 다른 AI CLI)를 실행한 뒤 전송하세요'
+                }
+              >
+                {sent ? '전송됨 ✓' : '🤖 Ask AI'}
+              </button>
+            )}
           </>
         )}
       </div>
 
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto">
-        {visible.map((line) => (
-          <LogRow
-            key={line.id}
-            line={line}
-            selected={selected.has(line.id)}
-            onSelect={(e) => handleRowClick(line.id, e)}
-          />
-        ))}
+        <div
+          style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
+        >
+          {virtualizer.getVirtualItems().map((vItem) => {
+            const line = visible[vItem.index]
+            return (
+              <div
+                key={line.id}
+                data-index={vItem.index}
+                ref={virtualizer.measureElement}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${vItem.start}px)`
+                }}
+              >
+                <LogRow
+                  line={line}
+                  selected={selected.has(line.id)}
+                  onSelect={(e) => handleRowClick(line.id, e)}
+                />
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
