@@ -9,6 +9,7 @@ export interface ServerProfile {
   authType: 'pem' | 'password' | 'agent'
   pemPath?: string
   password?: string
+  logPath?: string
   env?: 'prod' | 'dev' | 'staging' | 'local' | string
 }
 

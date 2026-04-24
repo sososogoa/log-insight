@@ -22,7 +22,7 @@ export function LogRow({ line, selected, onSelect }: Props): JSX.Element {
     <div
       onClick={onSelect}
       className={`log-row cursor-pointer ${levelClass} ${
-        selected ? 'bg-blue-950/40 border-l-2 border-blue-500' : 'hover:bg-neutral-900'
+        selected ? 'bg-blue-950/40' : 'hover:bg-neutral-900'
       }`}
     >
       {line.text}
