@@ -179,7 +179,7 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
   const inputCls = (field?: string) =>
     `w-full bg-neutral-900 border ${
       field && errors[field] ? 'border-red-500/60' : 'border-neutral-800'
-    } rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-neutral-600`
+    } rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-neutral-500`
 
   return (
     <form
@@ -309,7 +309,7 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
           </div>
 
           {browser.loading && (
-            <div className="px-2 py-2 text-neutral-600">Loading…</div>
+            <div className="px-2 py-2 text-neutral-400">Loading…</div>
           )}
           {browser.error && (
             <div className="px-2 py-1.5 text-red-400 text-[10px] leading-snug">
@@ -320,7 +320,7 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
           {!browser.loading && !browser.error && (
             <ul className="max-h-36 overflow-auto">
               {browser.entries.length === 0 && (
-                <li className="px-2 py-1.5 text-neutral-600">Empty</li>
+                <li className="px-2 py-1.5 text-neutral-400">Empty</li>
               )}
               {browser.entries.map((entry) => (
                 <li key={entry.name}>
@@ -333,7 +333,7 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
                     }
                     className="w-full text-left px-2 py-0.5 hover:bg-neutral-900 flex items-center gap-1.5"
                   >
-                    <span className={entry.isDir ? 'text-neutral-500' : 'text-neutral-600'}>
+                    <span className={entry.isDir ? 'text-neutral-400' : 'text-neutral-500'}>
                       {entry.isDir ? '▸' : '·'}
                     </span>
                     <span className={entry.isDir ? 'text-neutral-300' : 'text-neutral-400'}>
@@ -365,7 +365,7 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
         </button>
       </div>
       {form.localProjectPath && (
-        <p className="text-[10px] text-neutral-600 -mt-0.5">
+        <p className="text-[10px] text-neutral-500 -mt-0.5">
           서버 연결 시 터미널이 이 경로로 자동 이동합니다
         </p>
       )}

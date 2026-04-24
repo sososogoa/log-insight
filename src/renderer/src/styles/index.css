@@ -23,7 +23,7 @@ body,
 }
 
 .log-row {
-  @apply py-0.5 text-[13px] leading-5 flex items-start;
+  @apply py-0.5 text-[13px] leading-5 flex items-start text-neutral-300;
 }
 
 .log-row--info {

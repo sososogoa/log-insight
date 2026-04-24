@@ -64,7 +64,7 @@ export function ServerTree(): JSX.Element {
 
   return (
     <div className="text-sm h-full flex flex-col">
-      <div className="px-2 py-1 text-[11px] uppercase tracking-wider text-neutral-500 flex items-center justify-between border-b border-neutral-800/50">
+      <div className="px-2 py-1 text-[11px] uppercase tracking-wider text-neutral-400 flex items-center justify-between border-b border-neutral-800/50">
         <span>Servers</span>
         <button
           onClick={() => {
@@ -96,16 +96,16 @@ export function ServerTree(): JSX.Element {
       <ul className="flex-1 overflow-auto">
         {servers.length === 0 && !showForm && (
           <li className="px-4 py-8 flex flex-col items-center gap-3 text-center">
-            <div className="text-neutral-600 text-[11px] leading-relaxed">
+            <div className="text-neutral-400 text-[11px] leading-relaxed">
               SSH로 원격 서버 로그를<br />실시간으로 스트리밍합니다
             </div>
             <button
               onClick={() => setShowForm(true)}
-              className="px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs transition-colors"
+              className="px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs transition-colors"
             >
               + 첫 서버 추가
             </button>
-            <div className="text-neutral-700 text-[10px] leading-relaxed">
+            <div className="text-neutral-500 text-[10px] leading-relaxed">
               /var/log/*.log 파일을<br />tail -F로 구독합니다
             </div>
           </li>
@@ -127,7 +127,7 @@ export function ServerTree(): JSX.Element {
                       </span>
                     )}
                   </div>
-                  <div className="text-[11px] text-neutral-500 truncate">
+                  <div className="text-[11px] text-neutral-400 truncate">
                     {server.username}@{server.host}:{server.port}
                   </div>
                 </div>
@@ -140,14 +140,14 @@ export function ServerTree(): JSX.Element {
                 </button>
                 <button
                   onClick={() => { setEditingServer(server); setShowForm(false) }}
-                  className="text-neutral-600 hover:text-neutral-300 mt-0.5 text-[11px] shrink-0 px-0.5"
+                  className="text-neutral-500 hover:text-neutral-200 mt-0.5 text-[11px] shrink-0 px-0.5"
                   title="Edit"
                 >
                   ✎
                 </button>
                 <button
                   onClick={() => setConfirmDelete(server.id)}
-                  className="text-neutral-600 hover:text-red-400 mt-0.5 text-[11px] shrink-0 px-0.5"
+                  className="text-neutral-500 hover:text-red-400 mt-0.5 text-[11px] shrink-0 px-0.5"
                   title="Remove"
                 >
                   ×
@@ -184,7 +184,7 @@ export function ServerTree(): JSX.Element {
                 >
                   <input
                     autoFocus
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-neutral-600"
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-neutral-500"
                     placeholder="/var/log/app.log"
                     value={pathInputs[server.id]}
                     onChange={(e) =>
@@ -208,7 +208,7 @@ export function ServerTree(): JSX.Element {
                       />
                       <span className="flex-1 truncate">{src.path}</span>
                       {src.status === 'connecting' && (
-                        <span className="text-neutral-600">…</span>
+                        <span className="text-neutral-500">…</span>
                       )}
                       <button
                         onClick={() => void unsubscribe(src.sourceId)}

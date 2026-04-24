@@ -119,7 +119,7 @@ export function LogViewer(): JSX.Element {
         <span className="shrink-0">{visible.length} lines</span>
 
         {selected.size === 0 && visible.length > 0 && (
-          <span className="text-neutral-700 text-[11px] truncate select-none">
+          <span className="text-neutral-500 text-[11px] truncate select-none">
             라인 클릭으로 선택 · Shift+클릭 범위 선택 → Ask AI
           </span>
         )}

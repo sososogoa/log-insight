@@ -32,12 +32,12 @@ export function FilterPanel(): JSX.Element {
     <div className="p-3 space-y-4 text-sm h-full overflow-auto">
       {/* Level quick-filter */}
       <div>
-        <div className="text-[11px] uppercase tracking-wider text-neutral-500 mb-1.5 flex items-center justify-between">
+        <div className="text-[11px] uppercase tracking-wider text-neutral-400 mb-1.5 flex items-center justify-between">
           <span>Level</span>
           {levelFilter.size > 0 && (
             <button
               onClick={clearLevels}
-              className="text-[10px] text-neutral-600 hover:text-neutral-400"
+              className="text-[10px] text-neutral-500 hover:text-neutral-300"
             >
               all
             </button>
@@ -68,7 +68,7 @@ export function FilterPanel(): JSX.Element {
 
       {/* Keyword filters */}
       <div>
-        <div className="text-[11px] uppercase tracking-wider text-neutral-500 mb-1.5">
+        <div className="text-[11px] uppercase tracking-wider text-neutral-400 mb-1.5">
           Filters
         </div>
         <form
@@ -80,7 +80,7 @@ export function FilterPanel(): JSX.Element {
           }}
         >
           <input
-            className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-neutral-600"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-neutral-500"
             placeholder="keyword or /regex/"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -132,12 +132,12 @@ export function FilterPanel(): JSX.Element {
       {/* Active sources */}
       {sources.length > 0 && (
         <div>
-          <div className="text-[11px] uppercase tracking-wider text-neutral-500 mb-1.5">
+          <div className="text-[11px] uppercase tracking-wider text-neutral-400 mb-1.5">
             Sources
           </div>
           <ul className="space-y-1">
             {sources.map((src, idx) => (
-              <li key={src.sourceId} className="flex items-center gap-1.5 text-[11px] text-neutral-400">
+              <li key={src.sourceId} className="flex items-center gap-1.5 text-[11px] text-neutral-300">
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0"
                   style={{ background: getSourceColor(idx) }}
@@ -146,7 +146,7 @@ export function FilterPanel(): JSX.Element {
                   {src.serverName}: {src.path}
                 </span>
                 {src.status === 'connecting' && (
-                  <span className="text-neutral-600 shrink-0">…</span>
+                  <span className="text-neutral-500 shrink-0">…</span>
                 )}
                 {src.status === 'error' && (
                   <span className="text-red-400 shrink-0" title={src.error}>!</span>

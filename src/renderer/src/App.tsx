@@ -34,7 +34,7 @@ export default function App(): JSX.Element {
   }
 
   return (
-    <div className="h-full flex flex-col bg-neutral-950">
+    <div className="h-full flex flex-col bg-neutral-950 text-neutral-200">
       <header className="drag-region h-9 shrink-0 border-b border-neutral-800 pl-[76px] pr-3 flex items-center justify-between text-xs text-neutral-400">
         <span className="font-semibold text-neutral-200">LogInsight</span>
         <span className="no-drag">
@@ -107,7 +107,7 @@ export default function App(): JSX.Element {
         </Group>
       </div>
 
-      <footer className="h-6 shrink-0 border-t border-neutral-800 px-3 text-[11px] text-neutral-600 flex items-center gap-4">
+      <footer className="h-6 shrink-0 border-t border-neutral-800 px-3 text-[11px] text-neutral-400 flex items-center gap-4">
         <button
           onClick={() =>
             serverCollapsed ? serverRef.current?.expand() : serverRef.current?.collapse()

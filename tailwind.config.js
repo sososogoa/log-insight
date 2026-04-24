@@ -14,6 +14,12 @@ export default {
           error: '#f87171',
           debug: '#94a3b8',
           trace: '#64748b'
+        },
+        surface: {
+          terminal: '#000000',
+          deep: '#0a0a0a',
+          panel: '#171717',
+          elevated: '#262626'
         }
       }
     }

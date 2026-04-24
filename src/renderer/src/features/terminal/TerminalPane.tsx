@@ -51,7 +51,7 @@ export function TerminalPane(): JSX.Element {
             </button>
             <button
               onClick={() => void closeTerminal(s.id)}
-              className="pr-1.5 text-neutral-600 hover:text-neutral-300 transition-colors"
+              className="pr-1.5 text-neutral-500 hover:text-neutral-200 transition-colors"
               title="Close terminal"
             >
               ×
@@ -68,7 +68,7 @@ export function TerminalPane(): JSX.Element {
       </div>
 
       {showHint && (
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900/80 border-b border-neutral-800 text-[11px] text-neutral-500 shrink-0">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900/80 border-b border-neutral-800 text-[11px] text-neutral-400 shrink-0">
           <span className="flex-1">
             이 터미널에서{' '}
             <code className="text-neutral-300 bg-neutral-800 px-1 rounded">claude</code>
@@ -78,7 +78,7 @@ export function TerminalPane(): JSX.Element {
           </span>
           <button
             onClick={dismissHint}
-            className="text-neutral-600 hover:text-neutral-300 shrink-0 transition-colors"
+            className="text-neutral-500 hover:text-neutral-200 shrink-0 transition-colors"
             title="닫기"
           >
             ×
