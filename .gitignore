@@ -1,0 +1,12 @@
+node_modules/
+out/
+dist/
+build/dist/
+*.log
+.DS_Store
+.env
+.env.local
+.vscode/
+.idea/
+# electron-builder output
+release/
