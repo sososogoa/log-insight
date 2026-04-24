@@ -3,7 +3,10 @@ import { electronAPI } from '@electron-toolkit/preload'
 import { Channels } from '@shared/ipc-channels'
 import type {
   AiBridgeRequest,
+  Bookmark,
+  DockerListResult,
   LogLine,
+  LogSourceSpec,
   ServerProfile,
   TerminalSession
 } from '@shared/types'
@@ -17,8 +20,11 @@ const api = {
       ipcRenderer.invoke(Channels.ServersRemove, id)
   },
   logs: {
-    subscribe: (server: ServerProfile, path: string): Promise<{ sourceId: string }> =>
-      ipcRenderer.invoke(Channels.LogsSubscribe, { server, path }),
+    subscribe: (
+      server: ServerProfile,
+      spec: LogSourceSpec
+    ): Promise<{ sourceId: string }> =>
+      ipcRenderer.invoke(Channels.LogsSubscribe, { server, spec }),
     unsubscribe: (sourceId: string): Promise<void> =>
       ipcRenderer.invoke(Channels.LogsUnsubscribe, sourceId),
     onLine: (cb: (line: LogLine) => void): (() => void) => {
@@ -79,7 +85,27 @@ const api = {
     ): Promise<{ path: string; entries: { name: string; isDir: boolean }[] }> =>
       ipcRenderer.invoke(Channels.SshListDir, { server, path }),
     test: (server: ServerProfile): Promise<{ ok: true }> =>
-      ipcRenderer.invoke(Channels.SshTest, server)
+      ipcRenderer.invoke(Channels.SshTest, server),
+    dockerList: (server: ServerProfile): Promise<DockerListResult> =>
+      ipcRenderer.invoke(Channels.SshDockerList, server)
+  },
+  bookmarks: {
+    list: (): Promise<Bookmark[]> => ipcRenderer.invoke(Channels.BookmarksList),
+    save: (bm: Bookmark): Promise<Bookmark[]> =>
+      ipcRenderer.invoke(Channels.BookmarksSave, bm),
+    remove: (id: string): Promise<Bookmark[]> =>
+      ipcRenderer.invoke(Channels.BookmarksRemove, id),
+    clear: (): Promise<Bookmark[]> => ipcRenderer.invoke(Channels.BookmarksClear),
+    exportMarkdown: (): Promise<{ ok: boolean; path?: string }> =>
+      ipcRenderer.invoke(Channels.BookmarksExport)
+  },
+  shell: {
+    openInEditor: (payload: {
+      path: string
+      line?: number
+      column?: number
+    }): Promise<{ ok: boolean; error?: string }> =>
+      ipcRenderer.invoke(Channels.ShellOpenInEditor, payload)
   }
 }
 

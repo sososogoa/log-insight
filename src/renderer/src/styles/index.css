@@ -26,6 +26,30 @@ body,
   @apply py-0.5 text-[13px] leading-5 flex items-start text-neutral-300;
 }
 
+/* 스크롤바 숨김 (콘텐츠는 스크롤됨) */
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-in {
+  animation: toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .log-row--info {
   @apply text-log-info;
 }

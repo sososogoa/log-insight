@@ -3,7 +3,8 @@ import { useServersStore } from '@renderer/store/servers'
 import { useSourcesStore, getSourceColor } from '@renderer/store/sources'
 import { useTerminalStore } from '@renderer/store/terminal'
 import { AddServerForm } from './AddServerForm'
-import type { ServerProfile } from '@shared/types'
+import { SourcePicker } from './SourcePicker'
+import type { LogSourceSpec, ServerProfile } from '@shared/types'
 
 export function ServerTree(): JSX.Element {
   const { servers, loaded, load, save, remove } = useServersStore()
@@ -11,7 +12,7 @@ export function ServerTree(): JSX.Element {
   const activeTerminalId = useTerminalStore((s) => s.activeId)
   const [showForm, setShowForm] = useState(false)
   const [editingServer, setEditingServer] = useState<ServerProfile | null>(null)
-  const [pathInputs, setPathInputs] = useState<Record<string, string>>({})
+  const [pickerFor, setPickerFor] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   useEffect(() => {
@@ -31,32 +32,22 @@ export function ServerTree(): JSX.Element {
     }
     await remove(serverId)
     setConfirmDelete(null)
+    // 편집 중이던 대상이 삭제되면 폼도 함께 닫아야 함
+    if (editingServer?.id === serverId) setEditingServer(null)
+    if (pickerFor === serverId) setPickerFor(null)
   }
 
-  function handleConnect(server: ServerProfile): void {
-    const path = pathInputs[server.id] ?? server.logPath ?? ''
-    if (!path.trim()) {
-      setPathInputs((p) => ({ ...p, [server.id]: p[server.id] ?? '' }))
-      return
-    }
-    void subscribe(server, path.trim())
-    setPathInputs((p) => {
-      const next = { ...p }
-      delete next[server.id]
-      return next
-    })
+  function openPicker(server: ServerProfile): void {
+    setPickerFor(server.id)
+  }
+
+  function handlePickerConnect(server: ServerProfile, spec: LogSourceSpec): void {
+    void subscribe(server, spec)
+    setPickerFor(null)
     if (server.localProjectPath && activeTerminalId) {
       const escaped = server.localProjectPath.replace(/'/g, "'\\''")
       void window.api.terminal.write(activeTerminalId, `cd '${escaped}'\n`)
     }
-  }
-
-  function cancelPathInput(serverId: string): void {
-    setPathInputs((p) => {
-      const next = { ...p }
-      delete next[serverId]
-      return next
-    })
   }
 
   const serverSources = (serverId: string) =>
@@ -93,7 +84,7 @@ export function ServerTree(): JSX.Element {
         />
       )}
 
-      <ul className="flex-1 overflow-auto">
+      <ul className="flex-1 overflow-auto scrollbar-hidden">
         {servers.length === 0 && !showForm && (
           <li className="px-4 py-8 flex flex-col items-center gap-3 text-center">
             <div className="text-neutral-400 text-[11px] leading-relaxed">
@@ -113,7 +104,7 @@ export function ServerTree(): JSX.Element {
 
         {servers.map((server) => {
           const active = serverSources(server.id)
-          const hasPathPrompt = server.id in pathInputs
+          const pickerOpen = pickerFor === server.id
 
           return (
             <li key={server.id} className="border-b border-neutral-800/40 last:border-0">
@@ -132,9 +123,9 @@ export function ServerTree(): JSX.Element {
                   </div>
                 </div>
                 <button
-                  onClick={() => handleConnect(server)}
+                  onClick={() => openPicker(server)}
                   className="text-neutral-500 hover:text-blue-400 mt-0.5 text-[11px] shrink-0 px-0.5"
-                  title="Connect"
+                  title="Connect — File / Docker / Custom"
                 >
                   ▶
                 </button>
@@ -174,27 +165,13 @@ export function ServerTree(): JSX.Element {
                 </div>
               )}
 
-              {hasPathPrompt && (
-                <form
-                  className="px-3 pb-1.5"
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    handleConnect(server)
-                  }}
-                >
-                  <input
-                    autoFocus
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-neutral-500"
-                    placeholder="/var/log/app.log"
-                    value={pathInputs[server.id]}
-                    onChange={(e) =>
-                      setPathInputs((p) => ({ ...p, [server.id]: e.target.value }))
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') cancelPathInput(server.id)
-                    }}
-                  />
-                </form>
+              {pickerOpen && (
+                <SourcePicker
+                  server={server}
+                  initialPath={server.logPath}
+                  onConnect={(spec) => handlePickerConnect(server, spec)}
+                  onCancel={() => setPickerFor(null)}
+                />
               )}
 
               {active.map((src) => {
@@ -225,8 +202,9 @@ export function ServerTree(): JSX.Element {
                         </p>
                         <button
                           onClick={async () => {
+                            const spec = src.spec
                             await unsubscribe(src.sourceId)
-                            void subscribe(server, src.path)
+                            void subscribe(server, spec)
                           }}
                           className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"
                         >

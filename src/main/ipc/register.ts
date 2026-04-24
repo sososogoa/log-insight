@@ -5,7 +5,15 @@ import { createPtySession, writePty, resizePty, disposePty } from '../pty/pty-ma
 import { sendToAiBridge } from './ai-bridge'
 import { listServers, saveServer, removeServer } from './servers'
 import { openFileDialog, openFolderDialog } from './dialog'
-import { listDir, testConnection } from '../ssh/ssh-exec'
+import { listDir, listDockerContainers, testConnection } from '../ssh/ssh-exec'
+import {
+  listBookmarks,
+  saveBookmark,
+  removeBookmark,
+  clearBookmarks,
+  exportBookmarks
+} from './bookmarks'
+import { openInEditor } from './shell-ops'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle(Channels.ServersList, () => listServers())
@@ -32,4 +40,13 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(Channels.DialogOpenFolder, () => openFolderDialog())
   ipcMain.handle(Channels.SshListDir, (_e, { server, path }) => listDir(server, path))
   ipcMain.handle(Channels.SshTest, (_e, server) => testConnection(server))
+  ipcMain.handle(Channels.SshDockerList, (_e, server) => listDockerContainers(server))
+
+  ipcMain.handle(Channels.BookmarksList, () => listBookmarks())
+  ipcMain.handle(Channels.BookmarksSave, (_e, bm) => saveBookmark(bm))
+  ipcMain.handle(Channels.BookmarksRemove, (_e, id: string) => removeBookmark(id))
+  ipcMain.handle(Channels.BookmarksClear, () => clearBookmarks())
+  ipcMain.handle(Channels.BookmarksExport, () => exportBookmarks())
+
+  ipcMain.handle(Channels.ShellOpenInEditor, (_e, payload) => openInEditor(payload))
 }

@@ -21,7 +21,16 @@ export const Channels = {
   DialogOpenFile: 'dialog:open-file',
   DialogOpenFolder: 'dialog:open-folder',
   SshListDir: 'ssh:list-dir',
-  SshTest: 'ssh:test'
+  SshTest: 'ssh:test',
+  SshDockerList: 'ssh:docker-list',
+
+  BookmarksList: 'bookmarks:list',
+  BookmarksSave: 'bookmarks:save',
+  BookmarksRemove: 'bookmarks:remove',
+  BookmarksClear: 'bookmarks:clear',
+  BookmarksExport: 'bookmarks:export',
+
+  ShellOpenInEditor: 'shell:open-in-editor'
 } as const
 
 export type Channel = (typeof Channels)[keyof typeof Channels]

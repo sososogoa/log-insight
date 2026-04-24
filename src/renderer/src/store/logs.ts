@@ -10,23 +10,15 @@ const DEFAULT_INSTRUCTION = '다음 로그의 원인과 수정 방향을 분석�
 interface LogsState {
   sourceLines: Record<string, LogLine[]>
   lines: LogLine[]
-  selected: Set<string>
-  filters: FilterRule[]
-  levelFilter: Set<LogLevel>
   instruction: string
-  append: (line: LogLine) => void
+  traceFilter: string | null
+
   appendBatch: (newLines: LogLine[]) => void
+  append: (line: LogLine) => void
   clear: () => void
   clearSource: (sourceId: string) => void
-  toggleSelect: (id: string) => void
-  selectRange: (ids: string[]) => void
-  clearSelection: () => void
-  addFilter: (rule: FilterRule) => void
-  updateFilter: (rule: FilterRule) => void
-  removeFilter: (id: string) => void
-  toggleLevel: (level: LogLevel) => void
-  clearLevels: () => void
   setInstruction: (instruction: string) => void
+  setTraceFilter: (value: string | null) => void
 }
 
 function insertSorted(arr: LogLine[], line: LogLine): LogLine[] {
@@ -82,10 +74,8 @@ export const useLogsStore = create<LogsState>()(
     (set) => ({
       sourceLines: {},
       lines: [],
-      selected: new Set(),
-      filters: [],
-      levelFilter: new Set(),
       instruction: DEFAULT_INSTRUCTION,
+      traceFilter: null,
 
       append: (line) =>
         set((s) => {
@@ -112,7 +102,7 @@ export const useLogsStore = create<LogsState>()(
           return { sourceLines, lines }
         }),
 
-      clear: () => set({ sourceLines: {}, lines: [], selected: new Set() }),
+      clear: () => set({ sourceLines: {}, lines: [] }),
 
       clearSource: (sourceId) =>
         set((s) => {
@@ -120,59 +110,16 @@ export const useLogsStore = create<LogsState>()(
           return { sourceLines: rest, lines: rebuildMerged(rest) }
         }),
 
-      toggleSelect: (id) =>
-        set((s) => {
-          const next = new Set(s.selected)
-          if (next.has(id)) next.delete(id)
-          else next.add(id)
-          return { selected: next }
-        }),
-
-      selectRange: (ids) =>
-        set((s) => {
-          const next = new Set(s.selected)
-          ids.forEach((id) => next.add(id))
-          return { selected: next }
-        }),
-
-      clearSelection: () => set({ selected: new Set() }),
-
-      addFilter: (rule) => set((s) => ({ filters: [...s.filters, rule] })),
-      updateFilter: (rule) =>
-        set((s) => ({ filters: s.filters.map((r) => (r.id === rule.id ? rule : r)) })),
-      removeFilter: (id) => set((s) => ({ filters: s.filters.filter((r) => r.id !== id) })),
-
-      toggleLevel: (level) =>
-        set((s) => {
-          const next = new Set(s.levelFilter)
-          if (next.has(level)) next.delete(level)
-          else next.add(level)
-          return { levelFilter: next }
-        }),
-
-      clearLevels: () => set({ levelFilter: new Set() }),
-      setInstruction: (instruction) => set({ instruction })
+      setInstruction: (instruction) => set({ instruction }),
+      setTraceFilter: (value) => set({ traceFilter: value })
     }),
     {
-      name: 'loginsight-settings',
+      name: 'loginsight-global',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        filters: state.filters,
-        instruction: state.instruction,
-        levelFilter: [...state.levelFilter]
-      }),
+      partialize: (state) => ({ instruction: state.instruction }),
       merge: (persisted: unknown, current) => {
-        const p = persisted as {
-          filters?: FilterRule[]
-          instruction?: string
-          levelFilter?: LogLevel[]
-        }
-        return {
-          ...current,
-          filters: p.filters ?? current.filters,
-          instruction: p.instruction ?? current.instruction,
-          levelFilter: new Set<LogLevel>(p.levelFilter ?? [])
-        }
+        const p = persisted as { instruction?: string }
+        return { ...current, instruction: p.instruction ?? current.instruction }
       }
     }
   )

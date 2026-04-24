@@ -14,11 +14,25 @@ export interface ServerProfile {
   env?: 'prod' | 'dev' | 'staging' | 'local' | string
 }
 
-export interface LogSource {
+export type LogSourceSpec =
+  | { kind: 'file'; path: string }
+  | { kind: 'docker'; container: string; tail?: number; sudo?: boolean }
+  | { kind: 'custom'; command: string; label: string }
+
+export interface DockerContainer {
+  name: string
   id: string
-  serverId: string
-  path: string
-  label?: string
+  image: string
+  status: string
+}
+
+export interface DockerListResult {
+  containers: DockerContainer[]
+  /** sudo 없이 docker 실행이 안 돼서 sudo -n 으로 성공한 경우 true */
+  sudoRequired: boolean
+  /** docker 가 설치돼 있지 않거나 접근 자체가 불가능 */
+  unavailable?: boolean
+  error?: string
 }
 
 export interface LogLine {
@@ -50,16 +64,22 @@ export interface TerminalSession {
 
 export interface AiBridgeRequest {
   terminalId: string
-  template?: string
   payload: string
   instruction?: string
 }
 
-export interface IpcEvents {
-  'logs:line': LogLine
-  'logs:error': { sourceId: string; message: string }
-  'terminal:data': { terminalId: string; chunk: string }
-  'terminal:exit': { terminalId: string; code: number }
+export interface BookmarkedLine {
+  text: string
+  level: LogLevel
+  timestamp: number
+  sourceLabel?: string
 }
 
-export type IpcEventName = keyof IpcEvents
+export interface Bookmark {
+  id: string
+  createdAt: number
+  note?: string
+  /** snapshot at bookmark time — survives source buffer rotation */
+  lines: BookmarkedLine[]
+}
+

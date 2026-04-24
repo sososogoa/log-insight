@@ -1,13 +1,19 @@
 import { Client, type ConnectConfig } from 'ssh2'
 import { promises as fs } from 'fs'
+import { StringDecoder } from 'string_decoder'
 import type { WebContents } from 'electron'
 import { randomUUID } from 'crypto'
 import { Channels } from '@shared/ipc-channels'
-import type { LogLevel, LogLine, ServerProfile } from '@shared/types'
+import type {
+  LogLevel,
+  LogLine,
+  LogSourceSpec,
+  ServerProfile
+} from '@shared/types'
 
 interface SubscribePayload {
   server: ServerProfile
-  path: string
+  spec: LogSourceSpec
   sourceId?: string
 }
 
@@ -23,6 +29,18 @@ const MAX_RETRIES = 6
 const BASE_DELAY_MS = 1500
 const BATCH_FLUSH_MS = 16
 
+const DOCKER_TS_RE =
+  /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)\s/
+
+// CSI / OSC / single-char escapes. Strip before displaying because the browser
+// treats ESC as non-printing, leaving the CSI parameters visible as garbage.
+// eslint-disable-next-line no-control-regex
+const ANSI_RE = /\x1B(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*(?:\x07|\x1B\\)|[@-Z\\-_])/g
+
+function stripAnsi(s: string): string {
+  return s.replace(ANSI_RE, '')
+}
+
 function detectLevel(line: string): LogLevel {
   const m = /\b(TRACE|DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL|SEVERE)\b/i.exec(line)
   if (!m) return 'unknown'
@@ -37,6 +55,46 @@ function detectLevel(line: string): LogLevel {
 
 function escapePath(p: string): string {
   return `'${p.replace(/'/g, "'\\''")}'`
+}
+
+function escapeContainerRef(ref: string): string {
+  const cleaned = ref.replace(/[^a-zA-Z0-9_.\-]/g, '')
+  return cleaned || '_invalid_'
+}
+
+function buildStreamCommand(spec: LogSourceSpec): string {
+  if (spec.kind === 'file') {
+    return `tail -n 200 -F ${escapePath(spec.path)}`
+  }
+  if (spec.kind === 'docker') {
+    const container = escapeContainerRef(spec.container)
+    const tail = Math.max(0, Math.min(10000, spec.tail ?? 200))
+    const prefix = spec.sudo ? 'sudo -n ' : ''
+    // --timestamps: parsed by parseIncomingLine and stripped from display.
+    // No shell-level 2>&1 — stdout/stderr are read as separate ssh2 channels
+    // because shell merging can break line boundaries across their buffers.
+    return `${prefix}docker logs -f --tail ${tail} --timestamps ${container}`
+  }
+  return spec.command
+}
+
+function parseIncomingLine(
+  rawText: string,
+  spec: LogSourceSpec,
+  fallback: number
+): { text: string; timestamp: number } {
+  const clean = stripAnsi(rawText)
+  if (spec.kind === 'docker') {
+    const m = DOCKER_TS_RE.exec(clean)
+    if (m) {
+      const ts = Date.parse(m[1])
+      return {
+        text: clean.slice(m[0].length),
+        timestamp: Number.isFinite(ts) ? ts : fallback
+      }
+    }
+  }
+  return { text: clean, timestamp: fallback }
 }
 
 async function toConnectConfig(p: ServerProfile): Promise<ConnectConfig> {
@@ -80,6 +138,67 @@ function scheduleReconnect(
   setTimeout(() => void connectAndStream(payload, sourceId, sender, attempt), delay)
 }
 
+// StringDecoder keeps multibyte UTF-8 chars intact across chunk boundaries.
+function attachLineReader(opts: {
+  stream: NodeJS.ReadableStream
+  sourceId: string
+  spec: LogSourceSpec
+  push: (line: LogLine) => void
+  scheduleFlush: () => void
+  onEnd: () => void
+}): void {
+  const decoder = new StringDecoder('utf8')
+  let buf = ''
+
+  function consume(chunk: string): void {
+    if (!chunk) return
+    buf += chunk
+    buf = buf.replace(/\r\n/g, '\n').replace(/\r(?!\n)/g, '\n')
+    const lines = buf.split('\n')
+    buf = lines.pop() ?? ''
+    const now = Date.now()
+    for (const rawText of lines) {
+      if (stopped.has(opts.sourceId)) return
+      if (rawText === '') continue
+      const parsed = parseIncomingLine(rawText, opts.spec, now)
+      opts.push({
+        id: randomUUID(),
+        sourceId: opts.sourceId,
+        timestamp: parsed.timestamp,
+        level: detectLevel(parsed.text),
+        text: parsed.text
+      })
+    }
+    opts.scheduleFlush()
+  }
+
+  opts.stream.on('data', (data: Buffer) => {
+    consume(decoder.write(data))
+  })
+  opts.stream.on('end', () => {
+    const tail = decoder.end()
+    if (tail || buf) {
+      consume(tail)
+      // flush trailing partial line on stream close
+      if (buf) {
+        if (!stopped.has(opts.sourceId)) {
+          const parsed = parseIncomingLine(buf, opts.spec, Date.now())
+          opts.push({
+            id: randomUUID(),
+            sourceId: opts.sourceId,
+            timestamp: parsed.timestamp,
+            level: detectLevel(parsed.text),
+            text: parsed.text
+          })
+        }
+        buf = ''
+      }
+      opts.scheduleFlush()
+    }
+    opts.onEnd()
+  })
+}
+
 async function connectAndStream(
   payload: SubscribePayload,
   sourceId: string,
@@ -114,7 +233,7 @@ async function connectAndStream(
 
   active.set(sourceId, { client, sourceId })
 
-  client.exec(`tail -n 200 -F ${escapePath(payload.path)}`, (err, stream) => {
+  client.exec(buildStreamCommand(payload.spec), (err, stream) => {
     if (err) {
       sender.send(Channels.LogsError, { sourceId, message: err.message })
       client.end()
@@ -122,7 +241,6 @@ async function connectAndStream(
       return
     }
 
-    let buf = ''
     let pending: LogLine[] = []
     let flushTimer: NodeJS.Timeout | null = null
 
@@ -134,35 +252,48 @@ async function connectAndStream(
       sender.send(Channels.LogsLineBatch, batch)
     }
 
-    stream.on('data', (data: Buffer) => {
-      buf += data.toString('utf8')
-      const lines = buf.split('\n')
-      buf = lines.pop() ?? ''
-      const now = Date.now()
-      for (const text of lines) {
-        if (stopped.has(sourceId)) return
-        pending.push({
-          id: randomUUID(),
-          sourceId,
-          timestamp: now,
-          level: detectLevel(text),
-          text
-        })
-      }
+    function scheduleFlush(): void {
       if (pending.length > 0 && !flushTimer) {
         flushTimer = setTimeout(flush, BATCH_FLUSH_MS)
       }
+    }
+
+    let endedStreams = 0
+    const END_NEEDED = 2 // stdout + stderr
+    function onEnd(): void {
+      endedStreams++
+      if (endedStreams >= END_NEEDED) {
+        if (flushTimer) { clearTimeout(flushTimer); flush() }
+        client.end()
+        scheduleReconnect(payload, sourceId, sender, attempt + 1, 'stream closed')
+      }
+    }
+
+    attachLineReader({
+      stream,
+      sourceId,
+      spec: payload.spec,
+      push: (line) => pending.push(line),
+      scheduleFlush,
+      onEnd
     })
 
-    stream.stderr.on('data', (data: Buffer) => {
-      const msg = data.toString('utf8').trim()
-      if (msg) sender.send(Channels.LogsError, { sourceId, message: msg })
+    // stderr is also a log source (docker often writes to it); default level
+    // becomes 'error' when the line has no explicit level marker.
+    attachLineReader({
+      stream: stream.stderr,
+      sourceId,
+      spec: payload.spec,
+      push: (line) => {
+        if (line.level === 'unknown') line.level = 'error'
+        pending.push(line)
+      },
+      scheduleFlush,
+      onEnd
     })
 
     stream.on('close', () => {
       if (flushTimer) { clearTimeout(flushTimer); flush() }
-      client.end()
-      scheduleReconnect(payload, sourceId, sender, attempt + 1, 'stream closed')
     })
   })
 }
