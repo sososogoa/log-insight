@@ -1,9 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTerminalStore } from '@renderer/store/terminal'
 import { TerminalView } from './TerminalView'
 
+const HINT_KEY = 'terminal-hint-dismissed'
+
 export function TerminalPane(): JSX.Element {
   const { sessions, activeId, setActive, add, remove } = useTerminalStore()
+  const [showHint, setShowHint] = useState(
+    () => !localStorage.getItem(HINT_KEY)
+  )
 
   useEffect(() => {
     if (sessions.length === 0) {
@@ -21,9 +26,14 @@ export function TerminalPane(): JSX.Element {
     remove(id)
   }
 
+  function dismissHint(): void {
+    localStorage.setItem(HINT_KEY, '1')
+    setShowHint(false)
+  }
+
   return (
     <div className="h-full flex flex-col bg-black">
-      <div className="flex items-center gap-1 px-2 py-1 border-b border-neutral-800 text-xs">
+      <div className="flex items-center gap-1 px-2 py-1 border-b border-neutral-800 text-xs shrink-0">
         {sessions.map((s) => (
           <div
             key={s.id}
@@ -55,11 +65,28 @@ export function TerminalPane(): JSX.Element {
         >
           +
         </button>
-        <div className="ml-auto text-neutral-500">
-          Tip: Run claude / codex here. Selected logs pipe into stdin.
-        </div>
       </div>
-      <div className="flex-1 relative">
+
+      {showHint && (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900/80 border-b border-neutral-800 text-[11px] text-neutral-500 shrink-0">
+          <span className="flex-1">
+            이 터미널에서{' '}
+            <code className="text-neutral-300 bg-neutral-800 px-1 rounded">claude</code>
+            {' '}또는{' '}
+            <code className="text-neutral-300 bg-neutral-800 px-1 rounded">codex</code>
+            를 실행하면, 로그 선택 후 Ask AI 버튼으로 컨텍스트를 바로 전달할 수 있습니다.
+          </span>
+          <button
+            onClick={dismissHint}
+            className="text-neutral-600 hover:text-neutral-300 shrink-0 transition-colors"
+            title="닫기"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      <div className="flex-1 relative overflow-hidden">
         {sessions.map((s) => (
           <TerminalView key={s.id} session={s} visible={s.id === activeId} />
         ))}

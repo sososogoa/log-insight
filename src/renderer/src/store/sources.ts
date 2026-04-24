@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { ServerProfile } from '@shared/types'
+import { useLogsStore } from './logs'
 
 export interface ActiveSource {
   sourceId: string
@@ -71,6 +72,7 @@ export const useSourcesStore = create<SourcesState>((set, get) => ({
       // ignore — main process may have already cleaned up
     }
     set((s) => ({ sources: s.sources.filter((src) => src.sourceId !== sourceId) }))
+    useLogsStore.getState().clearSource(sourceId)
   },
 
   setError: (sourceId, error) =>

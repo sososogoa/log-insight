@@ -171,28 +171,40 @@ export function ServerTree(): JSX.Element {
               {active.map((src) => {
                 const idx = sources.indexOf(src)
                 return (
-                  <div
-                    key={src.sourceId}
-                    className="pl-4 pr-2 py-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400"
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ background: getSourceColor(idx) }}
-                    />
-                    <span className="flex-1 truncate">{src.path}</span>
-                    {src.status === 'connecting' && (
-                      <span className="text-neutral-600">…</span>
-                    )}
+                  <div key={src.sourceId}>
+                    <div className="pl-4 pr-2 py-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400">
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ background: getSourceColor(idx) }}
+                      />
+                      <span className="flex-1 truncate">{src.path}</span>
+                      {src.status === 'connecting' && (
+                        <span className="text-neutral-600">…</span>
+                      )}
+                      <button
+                        onClick={() => void unsubscribe(src.sourceId)}
+                        className="text-neutral-600 hover:text-red-400 shrink-0"
+                        title="Stop"
+                      >
+                        ■
+                      </button>
+                    </div>
                     {src.status === 'error' && (
-                      <span className="text-red-400" title={src.error}>!</span>
+                      <div className="pl-4 pr-2 pb-1.5 space-y-0.5">
+                        <p className="text-[10px] text-red-400/80 leading-snug break-all">
+                          {src.error ?? '연결 오류'}
+                        </p>
+                        <button
+                          onClick={async () => {
+                            await unsubscribe(src.sourceId)
+                            void subscribe(server, src.path)
+                          }}
+                          className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"
+                        >
+                          재시도
+                        </button>
+                      </div>
                     )}
-                    <button
-                      onClick={() => void unsubscribe(src.sourceId)}
-                      className="text-neutral-600 hover:text-red-400 shrink-0"
-                      title="Stop"
-                    >
-                      ■
-                    </button>
                   </div>
                 )
               })}
