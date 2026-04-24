@@ -4,6 +4,7 @@ import type { ServerProfile } from '@shared/types'
 interface Props {
   onSave: (profile: ServerProfile) => Promise<void>
   onCancel?: () => void
+  initialProfile?: ServerProfile
 }
 
 const ENVS = ['prod', 'staging', 'dev', 'local'] as const
@@ -61,8 +62,24 @@ function parentPath(path: string): string {
   return parts.join('/') || '/'
 }
 
-export function AddServerForm({ onSave }: Props): JSX.Element {
-  const [form, setForm] = useState(emptyForm())
+function profileToForm(p: ServerProfile): ReturnType<typeof emptyForm> {
+  return {
+    name: p.name,
+    host: p.host,
+    port: p.port,
+    username: p.username,
+    authType: p.authType,
+    password: p.password ?? '',
+    pemPath: p.pemPath ?? '',
+    logPath: p.logPath ?? '',
+    localProjectPath: p.localProjectPath ?? '',
+    env: p.env ?? ''
+  }
+}
+
+export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
+  const isEditing = !!initialProfile
+  const [form, setForm] = useState(() => initialProfile ? profileToForm(initialProfile) : emptyForm())
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [testState, setTestState] = useState<'idle' | 'testing' | 'ok' | 'fail'>('idle')
   const [testError, setTestError] = useState('')
@@ -87,7 +104,7 @@ export function AddServerForm({ onSave }: Props): JSX.Element {
     e.preventDefault()
     if (!validate()) return
     const profile: ServerProfile = {
-      id: crypto.randomUUID(),
+      id: initialProfile?.id ?? crypto.randomUUID(),
       name: form.name.trim(),
       host: form.host.trim(),
       port: form.port,
@@ -386,7 +403,7 @@ export function AddServerForm({ onSave }: Props): JSX.Element {
           type="submit"
           className="flex-1 bg-neutral-800 hover:bg-neutral-700 rounded px-2 py-1 text-xs text-neutral-200 transition-colors"
         >
-          Save
+          {isEditing ? '수정 저장' : 'Save'}
         </button>
       </div>
       {testState === 'fail' && testError && (

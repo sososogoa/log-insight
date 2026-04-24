@@ -10,6 +10,7 @@ export function ServerTree(): JSX.Element {
   const { sources, subscribe, unsubscribe } = useSourcesStore()
   const activeTerminalId = useTerminalStore((s) => s.activeId)
   const [showForm, setShowForm] = useState(false)
+  const [editingServer, setEditingServer] = useState<ServerProfile | null>(null)
   const [pathInputs, setPathInputs] = useState<Record<string, string>>({})
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
@@ -20,6 +21,7 @@ export function ServerTree(): JSX.Element {
   async function handleSave(profile: ServerProfile): Promise<void> {
     await save(profile)
     setShowForm(false)
+    setEditingServer(null)
   }
 
   async function handleRemove(serverId: string): Promise<void> {
@@ -65,16 +67,26 @@ export function ServerTree(): JSX.Element {
       <div className="px-2 py-1 text-[11px] uppercase tracking-wider text-neutral-500 flex items-center justify-between border-b border-neutral-800/50">
         <span>Servers</span>
         <button
-          onClick={() => setShowForm((v) => !v)}
+          onClick={() => {
+            setShowForm((v) => !v)
+            setEditingServer(null)
+          }}
           className="text-neutral-500 hover:text-neutral-200 w-5 h-5 flex items-center justify-center"
-          title={showForm ? 'Cancel' : 'Add server'}
+          title={showForm || editingServer ? 'Cancel' : 'Add server'}
         >
-          {showForm ? '×' : '+'}
+          {showForm || editingServer ? '×' : '+'}
         </button>
       </div>
 
       {showForm && (
         <AddServerForm onSave={handleSave} onCancel={() => setShowForm(false)} />
+      )}
+      {editingServer && (
+        <AddServerForm
+          onSave={handleSave}
+          onCancel={() => setEditingServer(null)}
+          initialProfile={editingServer}
+        />
       )}
 
       <ul className="flex-1 overflow-auto">
@@ -121,6 +133,13 @@ export function ServerTree(): JSX.Element {
                   title="Connect"
                 >
                   ▶
+                </button>
+                <button
+                  onClick={() => { setEditingServer(server); setShowForm(false) }}
+                  className="text-neutral-600 hover:text-neutral-300 mt-0.5 text-[11px] shrink-0 px-0.5"
+                  title="Edit"
+                >
+                  ✎
                 </button>
                 <button
                   onClick={() => setConfirmDelete(server.id)}
