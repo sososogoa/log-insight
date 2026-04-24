@@ -23,7 +23,7 @@ body,
 }
 
 .log-row {
-  @apply px-3 py-0.5 whitespace-pre-wrap break-all text-[13px] leading-5;
+  @apply py-0.5 text-[13px] leading-5 flex items-start;
 }
 
 .log-row--info {
