@@ -12,6 +12,7 @@
     "build": "electron-vite build",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "lint": "eslint . --ext .ts,.tsx --cache || true",
+    "icons": "node scripts/build-icons.mjs",
     "postinstall": "electron-builder install-app-deps && node -e \"require('fs').chmodSync(require('path').join(require.resolve('node-pty/package.json'),'../prebuilds/' + process.platform + '-' + process.arch + '/spawn-helper'), 0o755)\" || true",
     "build:mac": "pnpm build && electron-builder --mac",
     "build:win": "pnpm build && electron-builder --win",
@@ -43,11 +44,22 @@
     "postcss": "^8.4.39",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5",
     "vite": "^5.3.1"
   },
   "engines": {
     "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "sharp",
+      "node-pty",
+      "cpu-features",
+      "electron-winstaller",
+      "esbuild"
+    ]
   }
 }

@@ -30,7 +30,9 @@ export const Channels = {
   BookmarksClear: 'bookmarks:clear',
   BookmarksExport: 'bookmarks:export',
 
-  ShellOpenInEditor: 'shell:open-in-editor'
+  ShellOpenInEditor: 'shell:open-in-editor',
+
+  MenuCommandPalette: 'menu:command-palette'
 } as const
 
 export type Channel = (typeof Channels)[keyof typeof Channels]

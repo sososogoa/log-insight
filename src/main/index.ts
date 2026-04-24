@@ -1,11 +1,29 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, nativeImage } from 'electron'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { registerIpcHandlers } from './ipc/register'
 import { disposeAll } from './pty/pty-manager'
 import { stopAllStreams } from './ssh/log-stream'
+import { applyAppMenu } from './menu'
+
+app.setName('LogInsight')
+
+function resolveIconPath(): string | null {
+  // packaged app — icon sits next to main bundle via electron-builder
+  const candidates = [
+    join(__dirname, '../../build/icon.png'),
+    join(__dirname, '../../resources/icon.png'),
+    join(process.cwd(), 'build/icon.png')
+  ]
+  for (const p of candidates) {
+    if (existsSync(p)) return p
+  }
+  return null
+}
 
 function createWindow(): BrowserWindow {
+  const iconPath = resolveIconPath()
   const win = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -15,6 +33,8 @@ function createWindow(): BrowserWindow {
     autoHideMenuBar: true,
     titleBarStyle: 'hiddenInset',
     backgroundColor: '#0a0a0a',
+    title: 'LogInsight',
+    ...(iconPath ? { icon: iconPath } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
@@ -36,11 +56,29 @@ function createWindow(): BrowserWindow {
     win.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
+  applyAppMenu(win, is.dev)
   return win
 }
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('dev.biglink.loginsight')
+  app.setAboutPanelOptions({
+    applicationName: 'LogInsight',
+    applicationVersion: app.getVersion(),
+    credits: 'AI-connected realtime log streaming',
+    copyright: ''
+  })
+
+  // In dev the dock icon is the stock Electron one because the app runs from
+  // the Electron binary's bundle. Set it explicitly if we have a build icon.
+  const iconPath = resolveIconPath()
+  if (iconPath && process.platform === 'darwin' && app.dock) {
+    try {
+      app.dock.setIcon(nativeImage.createFromPath(iconPath))
+    } catch {
+      // non-fatal
+    }
+  }
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

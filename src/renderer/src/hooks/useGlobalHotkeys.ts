@@ -10,18 +10,15 @@ export interface HotkeyCallbacks {
   focusLogSearch: () => void
 }
 
-/**
- * 전역 단축키.
- *  ⌘K / Ctrl+K     커맨드 팔레트
- *  ⌘/              AI 프롬프트 편집 포커스 (활성 캔버스)
- *  ⌘F              로그 필터 검색 포커스
- *  ⌘⇧E             활성 캔버스에서 에러만 보기 토글
- *  ⌘⇧G             활성 캔버스에서 그루핑 토글
- *  ⌘B              선택 있으면 북마크, 없으면 북마크 패널 토글
- *  Esc             선택 → Focus → TraceFilter 순 해제
- */
+// ⌘K is owned by the native app menu (see main/menu.ts).
+// ⌘/   AI 프롬프트 포커스 · ⌘F 필터 검색 · ⌘⇧E 에러만 · ⌘⇧G 그루핑
+// ⌘B   선택 → 북마크 / 없으면 패널 토글
+// Esc  선택 → Focus → TraceFilter 순 해제
 export function useGlobalHotkeys(cb: HotkeyCallbacks): void {
   useEffect(() => {
+    const offMenu = window.api.menu.onCommandPalette(() =>
+      useCommandStore.getState().toggle()
+    )
     function onKey(e: KeyboardEvent): void {
       const mod = e.metaKey || e.ctrlKey
       const target = e.target as HTMLElement | null
@@ -30,13 +27,6 @@ export function useGlobalHotkeys(cb: HotkeyCallbacks): void {
         (target.tagName === 'INPUT' ||
           target.tagName === 'TEXTAREA' ||
           target.isContentEditable)
-
-      // ⌘K — 팔레트 토글
-      if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') {
-        e.preventDefault()
-        useCommandStore.getState().toggle()
-        return
-      }
 
       // ⌘/ — instruction 포커스
       if (mod && !e.shiftKey && e.key === '/') {
@@ -110,6 +100,9 @@ export function useGlobalHotkeys(cb: HotkeyCallbacks): void {
       }
     }
     document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      offMenu()
+    }
   }, [cb])
 }

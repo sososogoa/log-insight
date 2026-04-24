@@ -1,0 +1,35 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111111"/>
+      <stop offset="1" stop-color="#020202"/>
+    </linearGradient>
+    <linearGradient id="accentLine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#e5e7eb"/>
+    </linearGradient>
+    <filter id="spikeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <rect x="10" y="10" width="1004" height="1004" rx="214" fill="none" stroke="#262626" stroke-width="2"/>
+
+  <!-- baseline grid: four log lines of varying weight -->
+  <rect x="208" y="322" width="440" height="44" rx="22" fill="#404040"/>
+  <rect x="208" y="416" width="608" height="44" rx="22" fill="#6b7280"/>
+
+  <!-- spike line (error/incident) -->
+  <g filter="url(#spikeGlow)">
+    <circle cx="174" cy="532" r="28" fill="#f87171"/>
+  </g>
+  <rect x="208" y="510" width="560" height="44" rx="22" fill="url(#accentLine)"/>
+
+  <rect x="208" y="604" width="352" height="44" rx="22" fill="#52525b"/>
+  <rect x="208" y="698" width="496" height="44" rx="22" fill="#3f3f46"/>
+</svg>

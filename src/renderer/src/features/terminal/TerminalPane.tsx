@@ -74,7 +74,7 @@ export function TerminalPane(): JSX.Element {
             <code className="text-neutral-300 bg-neutral-800 px-1 rounded">claude</code>
             {' '}또는{' '}
             <code className="text-neutral-300 bg-neutral-800 px-1 rounded">codex</code>
-            를 실행하면, 로그 선택 후 Ask AI 버튼으로 컨텍스트를 바로 전달할 수 있습니다.
+            와 같은 AI CLI 를 실행하면, 로그 선택 후 Ask AI 버튼으로 컨텍스트를 바로 전달할 수 있습니다.
           </span>
           <button
             onClick={dismissHint}

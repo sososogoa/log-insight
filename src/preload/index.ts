@@ -106,6 +106,13 @@ const api = {
       column?: number
     }): Promise<{ ok: boolean; error?: string }> =>
       ipcRenderer.invoke(Channels.ShellOpenInEditor, payload)
+  },
+  menu: {
+    onCommandPalette: (cb: () => void): (() => void) => {
+      const handler = (): void => cb()
+      ipcRenderer.on(Channels.MenuCommandPalette, handler)
+      return () => ipcRenderer.off(Channels.MenuCommandPalette, handler)
+    }
   }
 }
 
