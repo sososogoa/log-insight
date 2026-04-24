@@ -1,9 +1,10 @@
+import React from 'react'
 import type { LogLine } from '@shared/types'
 
 interface Props {
   line: LogLine
   selected: boolean
-  onSelect: () => void
+  onSelect: (e: React.MouseEvent) => void
 }
 
 export function LogRow({ line, selected, onSelect }: Props): JSX.Element {
@@ -21,7 +22,8 @@ export function LogRow({ line, selected, onSelect }: Props): JSX.Element {
   return (
     <div
       onClick={onSelect}
-      className={`log-row cursor-pointer ${levelClass} ${
+      onMouseDown={(e) => { if (e.shiftKey) e.preventDefault() }}
+      className={`log-row cursor-pointer select-none ${levelClass} ${
         selected ? 'bg-blue-950/40' : 'hover:bg-neutral-900'
       }`}
     >

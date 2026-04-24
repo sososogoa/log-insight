@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type React from 'react'
 import { applyFilters, useLogsStore } from '@renderer/store/logs'
 import { useSourcesStore } from '@renderer/store/sources'
 import { useTerminalStore } from '@renderer/store/terminal'
@@ -13,9 +14,11 @@ export function LogViewer(): JSX.Element {
     append,
     selected,
     toggleSelect,
+    selectRange,
     clearSelection,
     setInstruction
   } = useLogsStore()
+  const anchorIdRef = useRef<string | null>(null)
   const { setError } = useSourcesStore()
   const activeTerminalId = useTerminalStore((s) => s.activeId)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -62,6 +65,21 @@ export function LogViewer(): JSX.Element {
     if (!el) return
     el.scrollTop = el.scrollHeight
   }, [visible.length])
+
+  function handleRowClick(id: string, e: React.MouseEvent): void {
+    if (e.shiftKey && anchorIdRef.current !== null) {
+      const anchorIdx = visible.findIndex((l) => l.id === anchorIdRef.current)
+      const currentIdx = visible.findIndex((l) => l.id === id)
+      if (anchorIdx !== -1 && currentIdx !== -1) {
+        const [from, to] =
+          anchorIdx <= currentIdx ? [anchorIdx, currentIdx] : [currentIdx, anchorIdx]
+        selectRange(visible.slice(from, to + 1).map((l) => l.id))
+        return
+      }
+    }
+    anchorIdRef.current = id
+    toggleSelect(id)
+  }
 
   async function sendSelectionToAi(): Promise<void> {
     if (!activeTerminalId || selected.size === 0) return
@@ -155,7 +173,7 @@ export function LogViewer(): JSX.Element {
             key={line.id}
             line={line}
             selected={selected.has(line.id)}
-            onSelect={() => toggleSelect(line.id)}
+            onSelect={(e) => handleRowClick(line.id, e)}
           />
         ))}
       </div>

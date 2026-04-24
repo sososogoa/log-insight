@@ -14,6 +14,7 @@ interface LogsState {
   append: (line: LogLine) => void
   clear: () => void
   toggleSelect: (id: string) => void
+  selectRange: (ids: string[]) => void
   clearSelection: () => void
   addFilter: (rule: FilterRule) => void
   updateFilter: (rule: FilterRule) => void
@@ -40,6 +41,12 @@ export const useLogsStore = create<LogsState>((set) => ({
       const next = new Set(s.selected)
       if (next.has(id)) next.delete(id)
       else next.add(id)
+      return { selected: next }
+    }),
+  selectRange: (ids) =>
+    set((s) => {
+      const next = new Set(s.selected)
+      ids.forEach((id) => next.add(id))
       return { selected: next }
     }),
   clearSelection: () => set({ selected: new Set() }),
