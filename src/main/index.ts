@@ -54,6 +54,11 @@ app.whenReady().then(() => {
   })
 })
 
+app.on('before-quit', () => {
+  stopAllStreams()
+  disposeAll()
+})
+
 app.on('will-quit', (e) => {
   e.preventDefault()
   stopAllStreams()
@@ -62,5 +67,18 @@ app.on('will-quit', (e) => {
 })
 
 app.on('window-all-closed', () => {
+  // In dev, the shell parent (pnpm dev) may SIGTERM us before any quit event
+  // fires. Reap native resources eagerly so late PTY/SSH data events don't hit
+  // a destroyed WebContents.
+  stopAllStreams()
+  disposeAll()
   if (process.platform !== 'darwin') app.quit()
 })
+
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) {
+  process.on(sig, () => {
+    stopAllStreams()
+    disposeAll()
+    app.exit(0)
+  })
+}

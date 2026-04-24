@@ -7,9 +7,21 @@ import type { TerminalSession } from '@shared/types'
 interface Entry {
   id: string
   proc: pty.IPty
+  sender: WebContents
 }
 
 const sessions = new Map<string, Entry>()
+let shuttingDown = false
+
+function safeSend(sender: WebContents, channel: string, payload: unknown): void {
+  if (shuttingDown) return
+  if (sender.isDestroyed()) return
+  try {
+    sender.send(channel, payload)
+  } catch {
+    // webContents may be torn down between the isDestroyed check and send
+  }
+}
 
 export function createPtySession(
   opts: Partial<TerminalSession>,
@@ -29,14 +41,23 @@ export function createPtySession(
   })
 
   proc.onData((chunk) => {
-    sender.send(Channels.TerminalData, { terminalId: id, chunk })
+    safeSend(sender, Channels.TerminalData, { terminalId: id, chunk })
   })
   proc.onExit(({ exitCode }) => {
-    sender.send(Channels.TerminalExit, { terminalId: id, code: exitCode })
+    safeSend(sender, Channels.TerminalExit, { terminalId: id, code: exitCode })
     sessions.delete(id)
   })
 
-  sessions.set(id, { id, proc })
+  // If the host window goes away (dev server kill, user closes the window on
+  // non-darwin), reap this session eagerly instead of waiting for shell exit.
+  sender.once('destroyed', () => {
+    const entry = sessions.get(id)
+    if (!entry) return
+    try { entry.proc.kill() } catch { /* noop */ }
+    sessions.delete(id)
+  })
+
+  sessions.set(id, { id, proc, sender })
   return {
     id,
     title: opts.title ?? shell.split('/').pop() ?? 'terminal',
@@ -66,6 +87,7 @@ export function disposePty(id: string): void {
 }
 
 export function disposeAll(): void {
+  shuttingDown = true
   for (const entry of sessions.values()) {
     try { entry.proc.kill() } catch { /* noop */ }
   }

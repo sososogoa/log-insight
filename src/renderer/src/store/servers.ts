@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { ServerProfile } from '@shared/types'
+import { useSourcesStore } from './sources'
 
 interface ServersState {
   servers: ServerProfile[]
@@ -23,5 +24,6 @@ export const useServersStore = create<ServersState>((set) => ({
   remove: async (id) => {
     const servers = await window.api.servers.remove(id)
     set({ servers })
+    useSourcesStore.getState().pruneRestoreFor(id)
   }
 }))

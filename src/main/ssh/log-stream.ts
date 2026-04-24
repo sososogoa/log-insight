@@ -20,10 +20,37 @@ interface SubscribePayload {
 interface ActiveStream {
   client: Client | null
   sourceId: string
+  /** cancels pending flush + reconnect timers when the stream is torn down */
+  cleanups: Set<() => void>
 }
 
 const active = new Map<string, ActiveStream>()
 const stopped = new Set<string>()
+let quitting = false
+
+function safeSend(sender: WebContents, channel: string, payload: unknown): void {
+  if (quitting) return
+  if (sender.isDestroyed()) return
+  try {
+    sender.send(channel, payload)
+  } catch {
+    // WebContents may be torn down between the isDestroyed check and send
+  }
+}
+
+function registerCleanup(sourceId: string, fn: () => void): void {
+  const entry = active.get(sourceId)
+  if (entry) entry.cleanups.add(fn)
+}
+
+function runCleanups(sourceId: string): void {
+  const entry = active.get(sourceId)
+  if (!entry) return
+  for (const fn of entry.cleanups) {
+    try { fn() } catch { /* noop */ }
+  }
+  entry.cleanups.clear()
+}
 
 const MAX_RETRIES = 6
 const BASE_DELAY_MS = 1500
@@ -124,18 +151,23 @@ function scheduleReconnect(
   reason: string
 ): void {
   if (stopped.has(sourceId)) return
+  if (quitting) return
   if (attempt > MAX_RETRIES) {
     stopped.add(sourceId)
     setTimeout(() => stopped.delete(sourceId), 60_000)
     active.delete(sourceId)
-    sender.send(Channels.LogsError, {
+    safeSend(sender, Channels.LogsError, {
       sourceId,
       message: `연결 끊김 (재시도 ${MAX_RETRIES}회 초과): ${reason}`
     })
     return
   }
   const delay = Math.min(BASE_DELAY_MS * 2 ** (attempt - 1), 30000)
-  setTimeout(() => void connectAndStream(payload, sourceId, sender, attempt), delay)
+  const timer = setTimeout(
+    () => void connectAndStream(payload, sourceId, sender, attempt),
+    delay
+  )
+  registerCleanup(sourceId, () => clearTimeout(timer))
 }
 
 // StringDecoder keeps multibyte UTF-8 chars intact across chunk boundaries.
@@ -231,11 +263,17 @@ async function connectAndStream(
     return
   }
 
-  active.set(sourceId, { client, sourceId })
+  // preserve existing cleanups across reconnect attempts
+  const prev = active.get(sourceId)
+  active.set(sourceId, {
+    client,
+    sourceId,
+    cleanups: prev?.cleanups ?? new Set()
+  })
 
   client.exec(buildStreamCommand(payload.spec), (err, stream) => {
     if (err) {
-      sender.send(Channels.LogsError, { sourceId, message: err.message })
+      safeSend(sender, Channels.LogsError, { sourceId, message: err.message })
       client.end()
       scheduleReconnect(payload, sourceId, sender, attempt + 1, err.message)
       return
@@ -249,7 +287,7 @@ async function connectAndStream(
       if (pending.length === 0) return
       const batch = pending
       pending = []
-      sender.send(Channels.LogsLineBatch, batch)
+      safeSend(sender, Channels.LogsLineBatch, batch)
     }
 
     function scheduleFlush(): void {
@@ -257,6 +295,14 @@ async function connectAndStream(
         flushTimer = setTimeout(flush, BATCH_FLUSH_MS)
       }
     }
+
+    registerCleanup(sourceId, () => {
+      if (flushTimer) {
+        clearTimeout(flushTimer)
+        flushTimer = null
+      }
+      pending = []
+    })
 
     let endedStreams = 0
     const END_NEEDED = 2 // stdout + stderr
@@ -304,7 +350,7 @@ export async function createSshLogStream(
 ): Promise<{ sourceId: string }> {
   const sourceId = payload.sourceId ?? randomUUID()
   stopped.delete(sourceId)
-  active.set(sourceId, { client: null, sourceId })
+  active.set(sourceId, { client: null, sourceId, cleanups: new Set() })
 
   await connectAndStream(payload, sourceId, sender, 0)
   return { sourceId }
@@ -313,6 +359,7 @@ export async function createSshLogStream(
 export function stopLogStream(sourceId: string): void {
   stopped.add(sourceId)
   setTimeout(() => stopped.delete(sourceId), 60_000)
+  runCleanups(sourceId)
   const entry = active.get(sourceId)
   if (entry?.client) {
     try { entry.client.end() } catch { /* noop */ }
@@ -321,7 +368,8 @@ export function stopLogStream(sourceId: string): void {
 }
 
 export function stopAllStreams(): void {
-  for (const sourceId of active.keys()) {
+  quitting = true
+  for (const sourceId of Array.from(active.keys())) {
     stopLogStream(sourceId)
   }
 }

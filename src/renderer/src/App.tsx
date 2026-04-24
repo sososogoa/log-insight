@@ -14,6 +14,9 @@ import { useBookmarksStore } from './store/bookmarks'
 import { useGlobalHotkeys } from './hooks/useGlobalHotkeys'
 import { useIncidentDetection } from './hooks/useIncidentDetection'
 import { useGlobalLogIngest } from './hooks/useGlobalLogIngest'
+import { useAutoReconnect } from './hooks/useAutoReconnect'
+import { RestoreBanner } from './features/servers/RestoreBanner'
+import { useServersStore } from './store/servers'
 
 export default function App(): JSX.Element {
   const serverRef = usePanelRef()
@@ -31,6 +34,13 @@ export default function App(): JSX.Element {
   const bookmarksLoaded = useBookmarksStore((s) => s.loaded)
 
   useGlobalLogIngest()
+  useAutoReconnect()
+
+  const loadServers = useServersStore((s) => s.load)
+  const serversLoaded = useServersStore((s) => s.loaded)
+  useEffect(() => {
+    if (!serversLoaded) void loadServers()
+  }, [serversLoaded, loadServers])
 
   useEffect(() => {
     if (expandCount === 0) return
@@ -106,6 +116,8 @@ export default function App(): JSX.Element {
       <header className="drag-region h-9 shrink-0 border-b border-neutral-800 pl-[76px] pr-3 flex items-center justify-between text-xs text-neutral-400">
         <span className="font-semibold text-neutral-200">LogInsight</span>
       </header>
+
+      <RestoreBanner />
 
       <div className="flex-1 overflow-hidden">
         <Group orientation="vertical" style={{ height: '100%' }}>
