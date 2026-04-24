@@ -36,15 +36,15 @@ export default function App(): JSX.Element {
 
       <div className="flex-1 overflow-hidden">
         <Group orientation="vertical" style={{ height: '100%' }}>
-          <Panel defaultSize={62} minSize={20}>
+          <Panel defaultSize="62" minSize="20">
             <Group orientation="horizontal" style={{ height: '100%' }}>
               <Panel
                 panelRef={serverRef}
-                defaultSize={20}
-                minSize={12}
-                maxSize={40}
+                defaultSize="20"
+                minSize="12"
+                maxSize="40"
                 collapsible
-                collapsedSize={0}
+                collapsedSize="0"
                 onResize={onServerResize}
               >
                 <div className="h-full border-r border-neutral-800 overflow-hidden">
@@ -56,7 +56,7 @@ export default function App(): JSX.Element {
                 className="w-1 bg-transparent data-[separator]:hover:bg-blue-500/30 transition-colors cursor-col-resize"
               />
 
-              <Panel defaultSize={60} minSize={25}>
+              <Panel defaultSize="60" minSize="25">
                 <LogViewer />
               </Panel>
 
@@ -66,11 +66,11 @@ export default function App(): JSX.Element {
 
               <Panel
                 panelRef={filterRef}
-                defaultSize={20}
-                minSize={12}
-                maxSize={40}
+                defaultSize="20"
+                minSize="12"
+                maxSize="40"
                 collapsible
-                collapsedSize={0}
+                collapsedSize="0"
                 onResize={onFilterResize}
               >
                 <div className="h-full border-l border-neutral-800 overflow-hidden">
@@ -86,10 +86,10 @@ export default function App(): JSX.Element {
 
           <Panel
             panelRef={terminalRef}
-            defaultSize={38}
-            minSize={8}
+            defaultSize="38"
+            minSize="8"
             collapsible
-            collapsedSize={0}
+            collapsedSize="0"
             onResize={onTerminalResize}
           >
             <div className="h-full border-t border-neutral-800 overflow-hidden">
