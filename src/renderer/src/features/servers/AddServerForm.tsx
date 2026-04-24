@@ -30,6 +30,7 @@ function emptyForm() {
     password: '',
     pemPath: '',
     logPath: '',
+    localProjectPath: '',
     env: ''
   }
 }
@@ -95,6 +96,7 @@ export function AddServerForm({ onSave }: Props): JSX.Element {
       ...(form.password && { password: form.password }),
       ...(form.pemPath && { pemPath: form.pemPath.trim() }),
       ...(form.logPath && { logPath: form.logPath.trim() }),
+      ...(form.localProjectPath && { localProjectPath: form.localProjectPath.trim() }),
       ...(form.env && { env: form.env })
     }
     await onSave(profile)
@@ -122,6 +124,11 @@ export function AddServerForm({ onSave }: Props): JSX.Element {
       { name: 'PEM / Key files', extensions: ['pem', 'key', 'ppk', ''] }
     ])
     if (path) setForm((f) => ({ ...f, pemPath: path }))
+  }
+
+  async function pickLocalFolder(): Promise<void> {
+    const path = await window.api.dialog.openFolder()
+    if (path) setForm((f) => ({ ...f, localProjectPath: path }))
   }
 
   async function loadDir(path: string): Promise<void> {
@@ -321,6 +328,29 @@ export function AddServerForm({ onSave }: Props): JSX.Element {
             </ul>
           )}
         </div>
+      )}
+
+      {/* Local project path */}
+      <div className="flex gap-1">
+        <input
+          className={inputCls()}
+          placeholder="로컬 프로젝트 경로 (선택)"
+          value={form.localProjectPath}
+          onChange={(e) => setForm((f) => ({ ...f, localProjectPath: e.target.value }))}
+          readOnly
+        />
+        <button
+          type="button"
+          onClick={pickLocalFolder}
+          className="shrink-0 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded px-2 py-1 text-[11px] text-neutral-300 transition-colors"
+        >
+          Browse
+        </button>
+      </div>
+      {form.localProjectPath && (
+        <p className="text-[10px] text-neutral-600 -mt-0.5">
+          서버 연결 시 터미널이 이 경로로 자동 이동합니다
+        </p>
       )}
 
       {/* Env */}

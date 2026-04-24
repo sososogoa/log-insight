@@ -9,3 +9,10 @@ export async function openFileDialog(
   })
   return canceled || filePaths.length === 0 ? null : filePaths[0]
 }
+
+export async function openFolderDialog(): Promise<string | null> {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openDirectory', 'createDirectory']
+  })
+  return canceled || filePaths.length === 0 ? null : filePaths[0]
+}

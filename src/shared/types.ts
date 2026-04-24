@@ -10,6 +10,7 @@ export interface ServerProfile {
   pemPath?: string
   password?: string
   logPath?: string
+  localProjectPath?: string
   env?: 'prod' | 'dev' | 'staging' | 'local' | string
 }
 

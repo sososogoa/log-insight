@@ -64,7 +64,8 @@ const api = {
   dialog: {
     openFile: (
       filters: { name: string; extensions: string[] }[] = []
-    ): Promise<string | null> => ipcRenderer.invoke(Channels.DialogOpenFile, filters)
+    ): Promise<string | null> => ipcRenderer.invoke(Channels.DialogOpenFile, filters),
+    openFolder: (): Promise<string | null> => ipcRenderer.invoke(Channels.DialogOpenFolder)
   },
   ssh: {
     listDir: (

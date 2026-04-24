@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useServersStore } from '@renderer/store/servers'
 import { useSourcesStore, getSourceColor } from '@renderer/store/sources'
+import { useTerminalStore } from '@renderer/store/terminal'
 import { AddServerForm } from './AddServerForm'
 import type { ServerProfile } from '@shared/types'
 
 export function ServerTree(): JSX.Element {
   const { servers, loaded, load, save, remove } = useServersStore()
   const { sources, subscribe, unsubscribe } = useSourcesStore()
+  const activeTerminalId = useTerminalStore((s) => s.activeId)
   const [showForm, setShowForm] = useState(false)
   const [pathInputs, setPathInputs] = useState<Record<string, string>>({})
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
@@ -41,6 +43,10 @@ export function ServerTree(): JSX.Element {
       delete next[server.id]
       return next
     })
+    if (server.localProjectPath && activeTerminalId) {
+      const escaped = server.localProjectPath.replace(/'/g, "'\\''")
+      void window.api.terminal.write(activeTerminalId, `cd '${escaped}'\n`)
+    }
   }
 
   function cancelPathInput(serverId: string): void {

@@ -18,6 +18,7 @@ export const Channels = {
   AiBridgeSend: 'ai-bridge:send',
 
   DialogOpenFile: 'dialog:open-file',
+  DialogOpenFolder: 'dialog:open-folder',
   SshListDir: 'ssh:list-dir',
   SshTest: 'ssh:test'
 } as const
