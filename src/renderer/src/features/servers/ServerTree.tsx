@@ -68,8 +68,12 @@ export function ServerTree(): JSX.Element {
         <span>Servers</span>
         <button
           onClick={() => {
-            setShowForm((v) => !v)
-            setEditingServer(null)
+            if (showForm || editingServer) {
+              setShowForm(false)
+              setEditingServer(null)
+            } else {
+              setShowForm(true)
+            }
           }}
           className="text-neutral-500 hover:text-neutral-200 w-5 h-5 flex items-center justify-center"
           title={showForm || editingServer ? 'Cancel' : 'Add server'}
