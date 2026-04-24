@@ -137,7 +137,11 @@ export function LogViewer(): JSX.Element {
               onClick={sendSelectionToAi}
               className="px-2 py-0.5 rounded bg-blue-600 text-white text-[11px] hover:bg-blue-500 disabled:opacity-40 shrink-0 transition-colors"
               disabled={!activeTerminalId}
-              title={activeTerminalId ? 'Send to active terminal' : 'Open a terminal first'}
+              title={
+                !activeTerminalId
+                  ? '터미널 탭을 먼저 열어주세요'
+                  : '터미널에서 claude (또는 다른 AI CLI)를 실행한 뒤 전송하세요'
+              }
             >
               🤖 Ask AI
             </button>
