@@ -18,7 +18,8 @@ export const Channels = {
   AiBridgeSend: 'ai-bridge:send',
 
   DialogOpenFile: 'dialog:open-file',
-  SshListDir: 'ssh:list-dir'
+  SshListDir: 'ssh:list-dir',
+  SshTest: 'ssh:test'
 } as const
 
 export type Channel = (typeof Channels)[keyof typeof Channels]

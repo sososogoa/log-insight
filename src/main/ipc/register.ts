@@ -5,7 +5,7 @@ import { createPtySession, writePty, resizePty, disposePty } from '../pty/pty-ma
 import { sendToAiBridge } from './ai-bridge'
 import { listServers, saveServer, removeServer } from './servers'
 import { openFileDialog } from './dialog'
-import { listDir } from '../ssh/ssh-exec'
+import { listDir, testConnection } from '../ssh/ssh-exec'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle(Channels.ServersList, () => listServers())
@@ -30,4 +30,5 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle(Channels.DialogOpenFile, (_e, filters) => openFileDialog(filters))
   ipcMain.handle(Channels.SshListDir, (_e, { server, path }) => listDir(server, path))
+  ipcMain.handle(Channels.SshTest, (_e, server) => testConnection(server))
 }

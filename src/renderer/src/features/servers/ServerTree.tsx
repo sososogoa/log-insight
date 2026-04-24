@@ -73,8 +73,19 @@ export function ServerTree(): JSX.Element {
 
       <ul className="flex-1 overflow-auto">
         {servers.length === 0 && !showForm && (
-          <li className="px-2 py-3 text-xs text-neutral-500">
-            No servers. Click + to add one.
+          <li className="px-4 py-8 flex flex-col items-center gap-3 text-center">
+            <div className="text-neutral-600 text-[11px] leading-relaxed">
+              SSH로 원격 서버 로그를<br />실시간으로 스트리밍합니다
+            </div>
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs transition-colors"
+            >
+              + 첫 서버 추가
+            </button>
+            <div className="text-neutral-700 text-[10px] leading-relaxed">
+              /var/log/*.log 파일을<br />tail -F로 구독합니다
+            </div>
           </li>
         )}
 

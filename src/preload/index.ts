@@ -71,7 +71,9 @@ const api = {
       server: ServerProfile,
       path: string
     ): Promise<{ path: string; entries: { name: string; isDir: boolean }[] }> =>
-      ipcRenderer.invoke(Channels.SshListDir, { server, path })
+      ipcRenderer.invoke(Channels.SshListDir, { server, path }),
+    test: (server: ServerProfile): Promise<{ ok: true }> =>
+      ipcRenderer.invoke(Channels.SshTest, server)
   }
 }
 

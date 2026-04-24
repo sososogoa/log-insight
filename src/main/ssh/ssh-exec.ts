@@ -47,6 +47,23 @@ async function sshExec(server: ServerProfile, command: string): Promise<string> 
   })
 }
 
+export async function testConnection(server: ServerProfile): Promise<{ ok: true }> {
+  const config = await toConnectConfig(server)
+  await new Promise<void>((resolve, reject) => {
+    const client = new Client()
+    client.once('ready', () => {
+      client.end()
+      resolve()
+    })
+    client.once('error', (err) => {
+      client.destroy()
+      reject(err)
+    })
+    client.connect(config)
+  })
+  return { ok: true }
+}
+
 export async function listDir(
   server: ServerProfile,
   path: string

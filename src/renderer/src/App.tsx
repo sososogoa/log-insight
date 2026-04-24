@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Group, Panel, Separator, usePanelRef } from 'react-resizable-panels'
 import type { PanelSize } from 'react-resizable-panels'
 import { ServerTree } from './features/servers/ServerTree'
@@ -6,6 +6,7 @@ import { LogViewer } from './features/logs/LogViewer'
 import { TerminalPane } from './features/terminal/TerminalPane'
 import { FilterPanel } from './features/logs/FilterPanel'
 import { AiBridgeStatus } from './features/ai-bridge/AiBridgeStatus'
+import { useTerminalStore } from './store/terminal'
 
 export default function App(): JSX.Element {
   const serverRef = usePanelRef()
@@ -14,6 +15,13 @@ export default function App(): JSX.Element {
   const [serverCollapsed, setServerCollapsed] = useState(false)
   const [filterCollapsed, setFilterCollapsed] = useState(false)
   const [terminalCollapsed, setTerminalCollapsed] = useState(false)
+  const expandCount = useTerminalStore((s) => s.expandCount)
+
+  useEffect(() => {
+    if (expandCount === 0) return
+    terminalRef.current?.expand()
+    setTerminalCollapsed(false)
+  }, [expandCount, terminalRef])
 
   function onServerResize(size: PanelSize): void {
     setServerCollapsed(size.asPercentage === 0)

@@ -63,6 +63,8 @@ function parentPath(path: string): string {
 export function AddServerForm({ onSave }: Props): JSX.Element {
   const [form, setForm] = useState(emptyForm())
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [testState, setTestState] = useState<'idle' | 'testing' | 'ok' | 'fail'>('idle')
+  const [testError, setTestError] = useState('')
   const [showBrowser, setShowBrowser] = useState(false)
   const [browser, setBrowser] = useState<BrowserState>({
     path: '/var/log',
@@ -96,6 +98,23 @@ export function AddServerForm({ onSave }: Props): JSX.Element {
       ...(form.env && { env: form.env })
     }
     await onSave(profile)
+  }
+
+  async function handleTestConnection(): Promise<void> {
+    if (!form.host.trim() || !form.username.trim()) {
+      setErrors((e) => ({ ...e, host: 'host와 username을 입력하세요' }))
+      return
+    }
+    setTestState('testing')
+    setTestError('')
+    try {
+      await window.api.ssh.test(buildTempServer(form))
+      setTestState('ok')
+      setTimeout(() => setTestState('idle'), 3000)
+    } catch (err) {
+      setTestState('fail')
+      setTestError(String(err).replace('Error: ', ''))
+    }
   }
 
   async function pickPemFile(): Promise<void> {
@@ -318,12 +337,31 @@ export function AddServerForm({ onSave }: Props): JSX.Element {
         ))}
       </select>
 
-      <button
-        type="submit"
-        className="w-full bg-neutral-800 hover:bg-neutral-700 rounded px-2 py-1 text-xs text-neutral-200 transition-colors"
-      >
-        Save
-      </button>
+      <div className="flex gap-1">
+        <button
+          type="button"
+          onClick={handleTestConnection}
+          disabled={testState === 'testing'}
+          className={`flex-1 rounded px-2 py-1 text-xs transition-colors border ${
+            testState === 'ok'
+              ? 'border-green-700/60 bg-green-900/30 text-green-400'
+              : testState === 'fail'
+                ? 'border-red-700/60 bg-red-900/20 text-red-400'
+                : 'border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-neutral-400'
+          }`}
+        >
+          {testState === 'testing' ? '연결 중…' : testState === 'ok' ? '✓ 연결 성공' : testState === 'fail' ? '✗ 연결 실패' : 'Test Connection'}
+        </button>
+        <button
+          type="submit"
+          className="flex-1 bg-neutral-800 hover:bg-neutral-700 rounded px-2 py-1 text-xs text-neutral-200 transition-colors"
+        >
+          Save
+        </button>
+      </div>
+      {testState === 'fail' && testError && (
+        <p className="text-[10px] text-red-400 leading-snug">{testError}</p>
+      )}
     </form>
   )
 }

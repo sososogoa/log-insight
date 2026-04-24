@@ -12,11 +12,15 @@ interface SubscribePayload {
 }
 
 interface ActiveStream {
-  client: Client
+  client: Client | null
   sourceId: string
 }
 
 const active = new Map<string, ActiveStream>()
+const stopped = new Set<string>()
+
+const MAX_RETRIES = 6
+const BASE_DELAY_MS = 1500
 
 function detectLevel(line: string): LogLevel {
   const m = /\b(TRACE|DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL|SEVERE)\b/i.exec(line)
@@ -30,8 +34,19 @@ function detectLevel(line: string): LogLevel {
   return 'unknown'
 }
 
+function escapePath(p: string): string {
+  return `'${p.replace(/'/g, "'\\''")}'`
+}
+
 async function toConnectConfig(p: ServerProfile): Promise<ConnectConfig> {
-  const base: ConnectConfig = { host: p.host, port: p.port, username: p.username }
+  const base: ConnectConfig = {
+    host: p.host,
+    port: p.port,
+    username: p.username,
+    readyTimeout: 15000,
+    keepaliveInterval: 10000,
+    keepaliveCountMax: 3
+  }
   if (p.authType === 'pem' && p.pemPath) {
     base.privateKey = await fs.readFile(p.pemPath)
   } else if (p.authType === 'password' && p.password) {
@@ -42,24 +57,66 @@ async function toConnectConfig(p: ServerProfile): Promise<ConnectConfig> {
   return base
 }
 
-export async function createSshLogStream(
+function scheduleReconnect(
   payload: SubscribePayload,
-  sender: WebContents
-): Promise<{ sourceId: string }> {
-  const sourceId = payload.sourceId ?? randomUUID()
+  sourceId: string,
+  sender: WebContents,
+  attempt: number,
+  reason: string
+): void {
+  if (stopped.has(sourceId)) return
+  if (attempt > MAX_RETRIES) {
+    stopped.add(sourceId)
+    active.delete(sourceId)
+    sender.send(Channels.LogsError, {
+      sourceId,
+      message: `연결 끊김 (재시도 ${MAX_RETRIES}회 초과): ${reason}`
+    })
+    return
+  }
+  const delay = Math.min(BASE_DELAY_MS * 2 ** (attempt - 1), 30000)
+  setTimeout(() => void connectAndStream(payload, sourceId, sender, attempt), delay)
+}
+
+async function connectAndStream(
+  payload: SubscribePayload,
+  sourceId: string,
+  sender: WebContents,
+  attempt: number
+): Promise<void> {
+  if (stopped.has(sourceId)) return
+
   const client = new Client()
   const config = await toConnectConfig(payload.server)
 
-  await new Promise<void>((resolve, reject) => {
-    client.once('ready', () => resolve())
-    client.once('error', reject)
-    client.connect(config)
-  })
+  try {
+    await new Promise<void>((resolve, reject) => {
+      client.once('ready', resolve)
+      client.once('error', reject)
+      client.connect(config)
+    })
+  } catch (err) {
+    try { client.destroy() } catch { /* noop */ }
+    if (attempt === 0) {
+      active.delete(sourceId)
+      throw err
+    }
+    scheduleReconnect(payload, sourceId, sender, attempt + 1, (err as Error).message)
+    return
+  }
 
-  client.exec(`tail -n 200 -F ${payload.path}`, (err, stream) => {
+  if (stopped.has(sourceId)) {
+    client.end()
+    return
+  }
+
+  active.set(sourceId, { client, sourceId })
+
+  client.exec(`tail -n 200 -F ${escapePath(payload.path)}`, (err, stream) => {
     if (err) {
       sender.send(Channels.LogsError, { sourceId, message: err.message })
       client.end()
+      scheduleReconnect(payload, sourceId, sender, attempt + 1, err.message)
       return
     }
 
@@ -69,6 +126,7 @@ export async function createSshLogStream(
       const lines = buf.split('\n')
       buf = lines.pop() ?? ''
       for (const text of lines) {
+        if (stopped.has(sourceId)) return
         const line: LogLine = {
           id: randomUUID(),
           sourceId,
@@ -82,22 +140,34 @@ export async function createSshLogStream(
     })
 
     stream.stderr.on('data', (data: Buffer) => {
-      sender.send(Channels.LogsError, { sourceId, message: data.toString('utf8') })
+      const msg = data.toString('utf8').trim()
+      if (msg) sender.send(Channels.LogsError, { sourceId, message: msg })
     })
 
     stream.on('close', () => {
       client.end()
-      active.delete(sourceId)
+      scheduleReconnect(payload, sourceId, sender, attempt + 1, 'stream closed')
     })
   })
+}
 
-  active.set(sourceId, { client, sourceId })
+export async function createSshLogStream(
+  payload: SubscribePayload,
+  sender: WebContents
+): Promise<{ sourceId: string }> {
+  const sourceId = payload.sourceId ?? randomUUID()
+  stopped.delete(sourceId)
+  active.set(sourceId, { client: null, sourceId })
+
+  await connectAndStream(payload, sourceId, sender, 0)
   return { sourceId }
 }
 
 export function stopLogStream(sourceId: string): void {
+  stopped.add(sourceId)
   const entry = active.get(sourceId)
-  if (!entry) return
-  entry.client.end()
+  if (entry?.client) {
+    try { entry.client.end() } catch { /* noop */ }
+  }
   active.delete(sourceId)
 }

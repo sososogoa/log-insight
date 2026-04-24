@@ -1,25 +1,49 @@
-import { app } from 'electron'
+import { app, safeStorage } from 'electron'
 import { promises as fs } from 'fs'
 import { join } from 'path'
 import type { ServerProfile } from '@shared/types'
 
 const STORE_FILE = 'servers.json'
+const ENC_PREFIX = 'enc:'
 
 function storePath(): string {
   return join(app.getPath('userData'), STORE_FILE)
 }
 
+function encryptField(value: string): string {
+  if (!safeStorage.isEncryptionAvailable()) return value
+  return ENC_PREFIX + safeStorage.encryptString(value).toString('base64')
+}
+
+function decryptField(value: string): string {
+  if (!value.startsWith(ENC_PREFIX)) return value
+  if (!safeStorage.isEncryptionAvailable()) return ''
+  try {
+    return safeStorage.decryptString(Buffer.from(value.slice(ENC_PREFIX.length), 'base64'))
+  } catch {
+    return ''
+  }
+}
+
 async function readStore(): Promise<ServerProfile[]> {
   try {
     const buf = await fs.readFile(storePath(), 'utf8')
-    return JSON.parse(buf) as ServerProfile[]
+    const list = JSON.parse(buf) as ServerProfile[]
+    return list.map((p) => ({
+      ...p,
+      ...(p.password !== undefined && { password: decryptField(p.password) })
+    }))
   } catch {
     return []
   }
 }
 
 async function writeStore(list: ServerProfile[]): Promise<void> {
-  await fs.writeFile(storePath(), JSON.stringify(list, null, 2), 'utf8')
+  const encrypted = list.map((p) => ({
+    ...p,
+    ...(p.password !== undefined && { password: encryptField(p.password) })
+  }))
+  await fs.writeFile(storePath(), JSON.stringify(encrypted, null, 2), 'utf8')
 }
 
 export async function listServers(): Promise<ServerProfile[]> {
