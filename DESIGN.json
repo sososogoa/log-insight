@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-24T00:00:00Z",
+  "title": "Design System: LogInsight",
+  "extensions": {
+    "colorMeta": {
+      "surface-terminal": {
+        "role": "neutral",
+        "displayName": "Terminal Floor",
+        "canonical": "oklch(0% 0 0)",
+        "tonalRamp": ["#000000", "#020202", "#050505", "#080808", "#0a0a0a", "#0f0f0f", "#141414", "#1a1a1a"]
+      },
+      "surface-deep": {
+        "role": "neutral",
+        "displayName": "Deep Surface",
+        "canonical": "oklch(8% 0.002 240)",
+        "tonalRamp": ["#020204", "#050508", "#0a0a0a", "#111113", "#171719", "#1e1e21", "#262629", "#303033"]
+      },
+      "surface-panel": {
+        "role": "neutral",
+        "displayName": "Panel Surface",
+        "canonical": "oklch(14% 0.002 240)",
+        "tonalRamp": ["#050508", "#0a0a0e", "#111116", "#171719", "#1e1e22", "#26262a", "#303035", "#3d3d42"]
+      },
+      "surface-elevated": {
+        "role": "neutral",
+        "displayName": "Elevated Surface",
+        "canonical": "oklch(22% 0.002 240)",
+        "tonalRamp": ["#0a0a0e", "#111116", "#1a1a1e", "#222226", "#262629", "#30303a", "#3a3a44", "#464650"]
+      },
+      "border-subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Border",
+        "canonical": "oklch(22% 0.002 240)",
+        "tonalRamp": ["#111116", "#1a1a1e", "#222226", "#262629", "#2e2e32", "#363639", "#404044", "#4a4a4e"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Primary Text",
+        "canonical": "oklch(90% 0.002 240)",
+        "tonalRamp": ["#6b6b6b", "#7a7a7a", "#8f8f8f", "#a3a3a3", "#b8b8b8", "#cccccc", "#e5e5e5", "#f0f0f0"]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Secondary Text",
+        "canonical": "oklch(70% 0.002 240)",
+        "tonalRamp": ["#404040", "#525252", "#636363", "#737373", "#8a8a8a", "#a3a3a3", "#b8b8b8", "#d4d4d4"]
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "oklch(55% 0.002 240)",
+        "tonalRamp": ["#2e2e2e", "#3d3d3d", "#525252", "#636363", "#737373", "#8a8a8a", "#a3a3a3", "#c0c0c0"]
+      },
+      "accent-action": {
+        "role": "primary",
+        "displayName": "Focus Sapphire",
+        "canonical": "oklch(48% 0.21 264)",
+        "tonalRamp": ["#070e2b", "#0c1845", "#122269", "#1a3296", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Focus Sapphire Hover",
+        "canonical": "oklch(58% 0.21 264)",
+        "tonalRamp": ["#0a1535", "#112060", "#1a3290", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"]
+      },
+      "accent-selection-bg": {
+        "role": "primary",
+        "displayName": "Selection Midnight",
+        "canonical": "oklch(22% 0.085 264)",
+        "tonalRamp": ["#040917", "#080f28", "#0f1b48", "#172554", "#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6"]
+      },
+      "status-connected": {
+        "role": "tertiary",
+        "displayName": "Status Green",
+        "canonical": "oklch(77% 0.20 145)",
+        "tonalRamp": ["#052e16", "#14532d", "#166534", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#86efac"]
+      },
+      "log-info": {
+        "role": "tertiary",
+        "displayName": "Info Blue",
+        "canonical": "oklch(67% 0.17 264)",
+        "tonalRamp": ["#0c2461", "#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"]
+      },
+      "log-warn": {
+        "role": "tertiary",
+        "displayName": "Warn Amber",
+        "canonical": "oklch(82% 0.15 80)",
+        "tonalRamp": ["#1c0f00", "#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#fbbf24", "#fde68a"]
+      },
+      "log-error": {
+        "role": "tertiary",
+        "displayName": "Error Red",
+        "canonical": "oklch(72% 0.17 27)",
+        "tonalRamp": ["#2d0909", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5"]
+      },
+      "log-debug": {
+        "role": "tertiary",
+        "displayName": "Debug Slate",
+        "canonical": "oklch(65% 0.04 240)",
+        "tonalRamp": ["#1e293b", "#293548", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"]
+      },
+      "log-trace": {
+        "role": "tertiary",
+        "displayName": "Trace Slate",
+        "canonical": "oklch(50% 0.04 240)",
+        "tonalRamp": ["#1e293b", "#293548", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"]
+      }
+    },
+    "typographyMeta": {
+      "mono": { "displayName": "Log / Content Mono", "purpose": "All log output and primary UI content." },
+      "label": { "displayName": "Section Label", "purpose": "Panel section headers (UPPERCASE, tracked)." },
+      "body": { "displayName": "Body", "purpose": "Server names, filter values, general UI text." },
+      "heading": { "displayName": "Heading", "purpose": "Panel titles, used sparingly." }
+    },
+    "shadows": [
+      {
+        "name": "floating-surface",
+        "value": "0 4px 16px rgba(0,0,0,0.6)",
+        "purpose": "Reserved for truly floating surfaces (dropdown, context menu) where tonal layering cannot separate. Use as last resort."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-action",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "State transitions on background-color, opacity. Max duration 80ms."
+      }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button — Ask AI",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The highest-priority action. Appears only when log lines are selected.",
+      "html": "<button class=\"ds-btn-primary\">🤖 Ask AI</button>",
+      "css": ".ds-btn-primary { background: #2563eb; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-size: 11px; line-height: 20px; border: none; cursor: pointer; transition: background 80ms cubic-bezier(0.4,0,0.2,1); } .ds-btn-primary:hover { background: #3b82f6; } .ds-btn-primary:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Terminal Tab — Active",
+      "kind": "nav",
+      "refersTo": "button-tab-active",
+      "description": "Active terminal session tab. Background fill distinguishes state — no stripe.",
+      "html": "<button class=\"ds-tab ds-tab--active\">terminal</button>",
+      "css": ".ds-tab { font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-size: 12px; padding: 2px 8px; border-radius: 4px; border: none; cursor: pointer; transition: background 80ms cubic-bezier(0.4,0,0.2,1), color 80ms cubic-bezier(0.4,0,0.2,1); } .ds-tab--active { background: #262626; color: #e5e5e5; } .ds-tab:not(.ds-tab--active) { background: transparent; color: #a3a3a3; } .ds-tab:not(.ds-tab--active):hover { background: #171717; }"
+    },
+    {
+      "name": "Filter Input",
+      "kind": "input",
+      "refersTo": "input-filter",
+      "description": "Single-line text input for keyword or regex filter entry.",
+      "html": "<input class=\"ds-input-filter\" type=\"text\" placeholder=\"keyword or /regex/\" />",
+      "css": ".ds-input-filter { width: 100%; background: #171717; border: 1px solid #262626; border-radius: 4px; padding: 4px 8px; font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-size: 12px; color: #e5e5e5; box-sizing: border-box; } .ds-input-filter::placeholder { color: #737373; } .ds-input-filter:focus { outline: none; box-shadow: 0 0 0 1px #3b82f6; border-color: #3b82f6; }"
+    },
+    {
+      "name": "Log Row — Error",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "A single log output line with ERROR level coloring. Selected state uses background tint only — never a left border stripe.",
+      "html": "<div class=\"ds-log-row ds-log-row--error\">2026-04-24 03:42:11 ERROR connection refused: host=db-prod port=5432</div>",
+      "css": ".ds-log-row { padding: 2px 12px; white-space: pre-wrap; word-break: break-all; font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-size: 13px; line-height: 20px; cursor: pointer; } .ds-log-row:hover { background: #171717; } .ds-log-row--selected { background: rgba(23,37,84,0.40); } .ds-log-row--info { color: #60a5fa; } .ds-log-row--warn { color: #fbbf24; } .ds-log-row--error { color: #f87171; } .ds-log-row--debug { color: #94a3b8; } .ds-log-row--trace { color: #64748b; }"
+    },
+    {
+      "name": "Section Label",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Panel section heading. Uppercase, tracked, muted. Not a heading element — it is a label.",
+      "html": "<div class=\"ds-section-label\">Filters</div>",
+      "css": ".ds-section-label { padding: 4px 8px; font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-size: 11px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; color: #737373; }"
+    },
+    {
+      "name": "Filter Rule Chip",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "An active filter rule rendered as a dense list item with inline controls.",
+      "html": "<li class=\"ds-filter-chip\"><input type=\"checkbox\" checked /><select class=\"ds-filter-select\"><option>incl</option><option>excl</option></select><select class=\"ds-filter-select\"><option>plain</option><option>regex</option></select><span class=\"ds-filter-value\">ERROR</span><button class=\"ds-filter-remove\">×</button></li>",
+      "css": ".ds-filter-chip { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-size: 12px; padding: 4px 8px; background: #171717; border-radius: 4px; list-style: none; color: #e5e5e5; } .ds-filter-select { background: #0a0a0a; border: 1px solid #262626; border-radius: 4px; padding: 2px 4px; font-family: inherit; font-size: 11px; color: #a3a3a3; } .ds-filter-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-filter-remove { background: none; border: none; cursor: pointer; color: #737373; font-size: 14px; padding: 0; transition: color 80ms; } .ds-filter-remove:hover { color: #f87171; }"
+    },
+    {
+      "name": "AI Bridge Status",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Inline connection status indicator. Text-based; no badges or icons beyond a Unicode bullet.",
+      "html": "<span class=\"ds-bridge-status\">AI bridge: <span class=\"ds-bridge-status--ok\">● connected to terminal</span></span>",
+      "css": ".ds-bridge-status { font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace; font-size: 11px; color: #737373; } .ds-bridge-status--ok { color: #4ade80; } .ds-bridge-status--idle { color: #525252; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Terminal Mind",
+    "overview": "A backend engineer sits at 11pm, terminal glowing on a dark desk, watching deployment logs stream by, waiting for the pattern that explains why staging broke twenty minutes ago. This is the physical scene. Dark is not a style choice here — it is the only honest answer.\n\nLogInsight is not a dashboard. It tries to be invisible in the way that a well-worn keyboard is invisible: you stop noticing it and start noticing the work. The log stream is the product. The UI's job is to stay out of the way, surface signal from noise, and hand context to the AI in a single gesture.\n\nEvery pixel follows from this. Mono throughout, because developers read monospace. Minimal radius, because softness implies consumer. Flat surfaces, because elevation is theater when there is no hierarchy to express. Color reserved for signal — log levels, action states, connection status — never for decoration.",
+    "keyCharacteristics": [
+      "Monospace-only typography: every glyph aligns, every column is a column",
+      "Six-step tonal depth with no shadows: surfaces distinguish by darkness, not elevation",
+      "Focus Sapphire accent appears in at most 10% of any screen",
+      "Semantic color for log levels only: meaning, never decoration",
+      "Sub-4px radius everywhere: this is a tool, not an app store listing",
+      "80ms hover transitions at most: the interface should feel immediate, not animated"
+    ],
+    "rules": [
+      { "name": "The Tonal Elevation Rule", "body": "There are no shadows in this system. Depth is expressed only by which neutral step a surface occupies. A surface at #262626 reads as elevated above #171717. Introduce a shadow and you introduce theater.", "section": "elevation" },
+      { "name": "The One Voice Rule", "body": "Focus Sapphire appears on at most 10% of any given screen. The rest is neutral. The color's rarity is what makes it readable as signal. If the blue is everywhere, nothing matters.", "section": "colors" },
+      { "name": "The Semantic Firewall Rule", "body": "Log level colors are reserved exclusively for log lines and level-specific UI. Using Warn Amber for a heading, a chip, or a status badge is prohibited. The palette stays readable at 5,000 lines because each hue has exactly one meaning.", "section": "colors" },
+      { "name": "The Mono Supremacy Rule", "body": "No sans-serif, no serif, no fallback to system-ui. If a future surface seems to need a different face, that surface has drifted out of scope for this design system.", "section": "typography" },
+      { "name": "The Scale Rule", "body": "The type scale has exactly two visual sizes: 13-14px (content) and 11px (labels). Adding a 16px or 18px heading makes the interface feel like a consumer app.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. If you want to express interactivity, use a background shift on hover, not a shadow. Shadows appear only for floating surfaces that genuinely need to separate from the layer below.", "section": "elevation" },
+      { "name": "The No-Stripe Rule", "body": "Terminal tabs and list items do not use a colored border-left or border-right to indicate state. Background fill is sufficient.", "section": "components" },
+      { "name": "The Selection Tint Rule", "body": "Selected log rows use a background tint only (rgba(23,37,84,0.40)). A border-left stripe on a selected row is prohibited — it introduces uneven indentation that misaligns the monospace column grid.", "section": "components" }
+    ],
+    "dos": [
+      "Do use monospace (JetBrains Mono) for every text element without exception.",
+      "Do express elevation through background steps (#000000 → #171717 → #262626). No shadows.",
+      "Do reserve Focus Sapphire (#2563eb) for interactive actions: buttons, focus rings, active states.",
+      "Do convey log level identity through text color alone.",
+      "Do show selection state as a background tint (bg-blue-950/40). Background only, no borders.",
+      "Do keep hover transitions at 80ms or under.",
+      "Do use 11px uppercase tracked labels for section headers only.",
+      "Do keep button radius at 4px."
+    ],
+    "donts": [
+      "Don't use border-left or border-right greater than 1px as a colored accent on any list item, log row, tab, or callout.",
+      "Don't use gradient text (background-clip: text).",
+      "Don't use shadows except for truly floating surfaces where tonal separation is impossible.",
+      "Don't introduce a sans-serif or proportional font for any surface.",
+      "Don't use log level colors (Info Blue, Warn Amber, Error Red, Debug Slate) for any non-log UI element.",
+      "Don't use oversized cards with icon, heading, and body text.",
+      "Don't create modal dialogs as a first response to any interaction.",
+      "Don't make the UI feel like a heavy Enterprise observability tool (Splunk-style panel sprawl, gray gradients).",
+      "Don't use bright or warm colors decoratively. Warn Amber means WARN.",
+      "Don't animate layout properties. Transitions on background-color and opacity only."
+    ]
+  }
+}
