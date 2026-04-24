@@ -4,6 +4,8 @@ import { createSshLogStream, stopLogStream } from '../ssh/log-stream'
 import { createPtySession, writePty, resizePty, disposePty } from '../pty/pty-manager'
 import { sendToAiBridge } from './ai-bridge'
 import { listServers, saveServer, removeServer } from './servers'
+import { openFileDialog } from './dialog'
+import { listDir } from '../ssh/ssh-exec'
 
 export function registerIpcHandlers(): void {
   ipcMain.handle(Channels.ServersList, () => listServers())
@@ -25,4 +27,7 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(Channels.TerminalDispose, (_e, id: string) => disposePty(id))
 
   ipcMain.handle(Channels.AiBridgeSend, (_e, req) => sendToAiBridge(req))
+
+  ipcMain.handle(Channels.DialogOpenFile, (_e, filters) => openFileDialog(filters))
+  ipcMain.handle(Channels.SshListDir, (_e, { server, path }) => listDir(server, path))
 }

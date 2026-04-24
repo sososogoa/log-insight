@@ -60,6 +60,18 @@ const api = {
   aiBridge: {
     send: (req: AiBridgeRequest): Promise<{ ok: boolean }> =>
       ipcRenderer.invoke(Channels.AiBridgeSend, req)
+  },
+  dialog: {
+    openFile: (
+      filters: { name: string; extensions: string[] }[] = []
+    ): Promise<string | null> => ipcRenderer.invoke(Channels.DialogOpenFile, filters)
+  },
+  ssh: {
+    listDir: (
+      server: ServerProfile,
+      path: string
+    ): Promise<{ path: string; entries: { name: string; isDir: boolean }[] }> =>
+      ipcRenderer.invoke(Channels.SshListDir, { server, path })
   }
 }
 
