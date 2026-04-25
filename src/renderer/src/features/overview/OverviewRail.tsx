@@ -51,8 +51,8 @@ function computeBuckets(lines: readonly LogLine[]): Buckets {
 }
 
 /**
- * 소스마다 독립 컴포넌트 — `sourceLines[sourceId]` 만 구독.
- * 한 소스의 로그가 들어와도 다른 레인 / 상위 OverviewRail 이 리렌더되지 않음.
+ * Independent component per source — subscribes only to `sourceLines[sourceId]`.
+ * A log arriving for one source does not re-render other lanes or the parent OverviewRail.
  */
 function SourceLaneInner({ source }: { source: ActiveSource }): JSX.Element {
   const lines = useLogsStore(
@@ -89,7 +89,7 @@ function SourceLaneInner({ source }: { source: ActiveSource }): JSX.Element {
     <button
       onClick={activate}
       className="w-full text-left block px-2 py-1 hover:bg-neutral-900 rounded-sm group"
-      title={`${source.serverName} · ${source.path} — 클릭하면 캔버스 복원/포커스`}
+      title={`${source.serverName} · ${source.path} — click to restore/focus canvas`}
     >
       <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 mb-0.5">
         <span
@@ -153,7 +153,7 @@ function OverviewRailInner(): JSX.Element {
       <div className="flex-1 overflow-auto scrollbar-hidden">
         {sources.length === 0 && (
           <div className="px-3 py-6 text-center text-neutral-500 text-[11px]">
-            연결된 소스가 없습니다
+            No sources connected
           </div>
         )}
         {sources.map((s) => (
@@ -166,7 +166,7 @@ function OverviewRailInner(): JSX.Element {
             <div className="flex items-center gap-1 mb-1">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
               <span className="text-red-200 font-semibold text-[11px] flex-1">
-                인시던트
+                Incident
               </span>
               <button
                 onClick={clearIncident}
@@ -192,7 +192,7 @@ function OverviewRailInner(): JSX.Element {
                 }}
                 className="mt-1 text-[10px] text-cyan-300 hover:text-cyan-200 underline decoration-dotted"
               >
-                → 해당 소스 캔버스로 이동
+                → Go to source canvas
               </button>
             )}
           </div>
@@ -201,17 +201,17 @@ function OverviewRailInner(): JSX.Element {
         {/* Bookmarks resident */}
         <div className="mt-3 px-2 pb-2">
           <div className="text-[10px] uppercase tracking-wider text-neutral-500 mb-1 flex items-center justify-between">
-            <span>🔖 북마크</span>
+            <span>🔖 Bookmarks</span>
             <button
               onClick={() => openBookmarksPanel(true)}
               className="text-neutral-500 hover:text-neutral-300 normal-case tracking-normal text-[10px]"
             >
-              전체
+              All
             </button>
           </div>
           {bookmarks.length === 0 && (
             <div className="text-[10px] text-neutral-600">
-              ⌘B 로 선택 라인 저장
+              Save selected lines with ⌘B
             </div>
           )}
           <ul className="space-y-0.5">

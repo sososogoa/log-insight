@@ -5,7 +5,7 @@ interface BookmarksState {
   list: Bookmark[]
   loaded: boolean
   panelOpen: boolean
-  /** 패널이 열리자마자 note 편집을 시작할 bookmark id. one-shot */
+  /** Bookmark id whose note editing starts as soon as the panel opens. One-shot. */
   focusNoteId: string | null
 
   load: () => Promise<void>

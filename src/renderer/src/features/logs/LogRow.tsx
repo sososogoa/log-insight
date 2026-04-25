@@ -6,21 +6,21 @@ interface Props {
   line: LogLine
   selected: boolean
   onSelect: (e: React.MouseEvent) => void
-  /** 그룹 헤더 라인(접힘)일 때 표시할 카운트. undefined 이면 일반 라인. */
+  /** Count to display when this is a collapsed group header. undefined means a normal line. */
   groupCount?: number
-  /** 그룹 헤더를 펼쳤을 때 true. 시각적으로 구분. */
+  /** true when the group header is expanded — shown with visual distinction. */
   groupExpanded?: boolean
-  /** 그룹 확장/축소 토글 */
+  /** Toggle group expand/collapse. */
   onToggleGroup?: (e: React.MouseEvent) => void
-  /** 그룹의 자식 라인 (들여쓰기 표시) */
+  /** Whether this line is a child of a group (indented display). */
   isGroupChild?: boolean
-  /** 패턴 포커스 액션 */
+  /** Pattern focus action. */
   onFocusPattern?: (e: React.MouseEvent) => void
-  /** 이 라인을 송출한 소스의 컬러 (좌측 스트라이프) */
+  /** Color of the source that emitted this line (left stripe). */
   sourceColor?: string
-  /** 트레이스 ID 클릭 핸들러 */
+  /** Trace ID click handler. */
   onTraceClick?: (value: string) => void
-  /** 파일:라인 클릭 핸들러 (에디터 점프) */
+  /** File:line click handler (editor jump). */
   onCodeJump?: (loc: CodeLocation) => void
 }
 
@@ -61,7 +61,7 @@ function LogRowInner({
         onClick={onSelect}
         onMouseDown={(e) => { if (e.shiftKey) e.preventDefault() }}
         className="w-5 shrink-0 flex justify-center pt-[3px] cursor-pointer group/check self-stretch"
-        title={selected ? '선택 해제 (Shift+클릭: 범위)' : '선택 (Shift+클릭: 범위)'}
+        title={selected ? 'Deselect (Shift+click: range)' : 'Select (Shift+click: range)'}
       >
         <span
           className={`w-2 h-2 rounded-sm mt-0.5 transition-colors ${
@@ -76,7 +76,7 @@ function LogRowInner({
         <button
           onClick={onToggleGroup}
           className="shrink-0 mr-1.5 mt-[1px] px-1.5 rounded text-[10px] font-medium bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-colors tabular-nums"
-          title={groupExpanded ? '그룹 접기' : `같은 패턴 ${groupCount}회 — 펼치기`}
+          title={groupExpanded ? 'Collapse group' : `Same pattern ×${groupCount} — expand`}
         >
           {groupExpanded ? '▾' : '▸'} ×{groupCount}
         </button>
@@ -90,7 +90,7 @@ function LogRowInner({
         <button
           onClick={onFocusPattern}
           className="shrink-0 opacity-30 group-hover/row:opacity-90 hover:!opacity-100 text-[12px] text-neutral-400 hover:text-cyan-300 hover:bg-cyan-500/15 rounded px-1 self-start mt-[1px] transition-opacity"
-          title="이 패턴만 보기 (Focus)"
+          title="Show only this pattern (Focus)"
         >
           ⊙
         </button>

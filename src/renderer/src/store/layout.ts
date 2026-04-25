@@ -1,15 +1,15 @@
 /**
- * 캔버스 배치를 표현하는 트리.
- *  - Leaf: 탭 그룹. 하나 이상의 캔버스를 탭으로 가짐
- *  - Split: 가로/세로 분할. 자식 노드 여러 개
- *  - Floating: 트리 밖에서 절대 좌표로 떠 있는 캔버스 (pop-out)
+ * Tree representing canvas layout.
+ *  - Leaf: tab group — holds one or more canvases as tabs
+ *  - Split: horizontal/vertical split — multiple child nodes
+ *  - Floating: canvas that floats at absolute coordinates outside the tree (pop-out)
  */
 
 export interface LayoutLeaf {
   id: string
   kind: 'leaf'
   canvasIds: string[]
-  /** leaf 내 현재 활성 canvasId (탭) */
+  /** Currently active canvasId within the leaf (tab). */
   activeId: string
 }
 
@@ -85,7 +85,7 @@ export function collectLeaves(root: LayoutNode): LayoutLeaf[] {
   return out
 }
 
-/** 트리 동형사상 map — 변경한 노드만 새 참조, 나머지는 기존 참조 유지 */
+/** Tree isomorphism map — only changed nodes get new references; others retain existing references. */
 export function mapLayout(
   root: LayoutNode,
   fn: (n: LayoutNode) => LayoutNode
@@ -128,7 +128,7 @@ export function addCanvasToLeaf(
   return mapLayout(root, (n) => {
     if (n.kind !== 'leaf' || n.id !== leafId) return n
     if (n.canvasIds.includes(canvasId)) {
-      // 이미 있으면 order 만 조정
+      // already present — just reorder
       const filtered = n.canvasIds.filter((id) => id !== canvasId)
       const ids =
         typeof index === 'number'
@@ -158,7 +158,7 @@ export function splitLeaf(
         position === 'after' ? [n, newLeaf] : [newLeaf, n]
       return makeSplit(direction, children)
     }
-    // split: 자식에 leaf 가 포함됐고 split 의 방향이 같으면 flat 화
+    // split: if a child leaf is found and the split direction matches, flatten it
     let found = false
     const children: LayoutNode[] = []
     for (const c of n.children) {

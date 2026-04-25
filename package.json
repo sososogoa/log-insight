@@ -1,6 +1,6 @@
 {
   "name": "log-insight",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "description": "Realtime remote log streaming + built-in AI-bridged terminal",
   "main": "./out/main/index.js",

@@ -118,7 +118,7 @@ function FloatingCanvasInner({ canvas }: Props): JSX.Element {
             })
           }
           className="text-[11px] text-neutral-500 hover:text-neutral-200 px-1"
-          title="최소화"
+          title="Minimize"
         >
           _
         </button>
@@ -126,7 +126,7 @@ function FloatingCanvasInner({ canvas }: Props): JSX.Element {
           onMouseDown={(e) => e.stopPropagation()}
           onClick={() => dock(canvas.id)}
           className="text-[11px] text-neutral-500 hover:text-cyan-300 px-1"
-          title="타일에 도킹"
+          title="Dock to tile"
         >
           ▤
         </button>
@@ -134,7 +134,7 @@ function FloatingCanvasInner({ canvas }: Props): JSX.Element {
           onMouseDown={(e) => e.stopPropagation()}
           onClick={() => close(canvas.id)}
           className="text-[11px] text-neutral-500 hover:text-red-400 px-1"
-          title="닫기"
+          title="Close"
         >
           ×
         </button>

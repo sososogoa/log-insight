@@ -31,10 +31,10 @@ export function RestoreBanner(): JSX.Element | null {
 
   const label =
     connecting > 0
-      ? `복원 중 · ${streaming}/${total}`
+      ? `Restoring · ${streaming}/${total}`
       : errored > 0
-        ? `복원 완료 · ${streaming} 연결, ${errored} 실패`
-        : `복원 완료 · ${streaming}개 소스`
+        ? `Restore complete · ${streaming} connected, ${errored} failed`
+        : `Restore complete · ${streaming} sources`
 
   const icon =
     connecting > 0 ? '↻' : errored > 0 ? '⚠' : '✓'
@@ -54,7 +54,7 @@ export function RestoreBanner(): JSX.Element | null {
           onClick={() => void cancelAll()}
           className="text-neutral-400 hover:text-red-300 px-2 py-0.5 rounded hover:bg-neutral-800"
         >
-          전부 취소
+          Cancel all
         </button>
       )}
       <button

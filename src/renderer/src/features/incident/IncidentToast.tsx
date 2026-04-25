@@ -5,7 +5,7 @@ import { useSourcesStore } from '@renderer/store/sources'
 import { useCanvasesStore } from '@renderer/store/canvases'
 
 const ANALYZE_INSTRUCTION =
-  '다음은 최근 60초 동안 평소보다 이상 급증한 에러 로그입니다. 원인을 분석하고 긴급 대응 방안을 제안해주세요:'
+  'The following are error logs that spiked abnormally in the last 60 seconds. Analyze the cause and suggest urgent mitigation steps:'
 
 export function IncidentToast(): JSX.Element | null {
   const active = useIncidentStore((s) => s.active)
@@ -60,18 +60,18 @@ export function IncidentToast(): JSX.Element | null {
       <div className="px-3 py-2 bg-red-950/40 border-b border-red-500/30 flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
         <span className="text-sm font-semibold text-red-200 flex-1">
-          인시던트 감지 · Error spike
+          Incident Detected · Error spike
         </span>
         <button
           onClick={() => silence(5 * 60_000)}
-          title="5분 음소거"
+          title="Mute for 5 minutes"
           className="text-[10px] text-neutral-500 hover:text-neutral-300 px-1"
         >
           🔕 5m
         </button>
         <button
           onClick={dismiss}
-          title="닫기"
+          title="Close"
           className="text-neutral-400 hover:text-neutral-100 text-sm leading-none px-1"
         >
           ×
@@ -93,7 +93,7 @@ export function IncidentToast(): JSX.Element | null {
             onClick={focusIncidentCanvas}
             className="text-[11px] text-cyan-300 hover:text-cyan-200 underline decoration-dotted"
           >
-            → {srcName} 캔버스 열기
+            → Open {srcName} canvas
           </button>
         )}
         {active.sampleErrors.length > 0 && (
@@ -123,16 +123,16 @@ export function IncidentToast(): JSX.Element | null {
           }`}
         >
           {sending
-            ? '분석 요청 중…'
+            ? 'Requesting analysis…'
             : sent
-              ? '✓ AI 에 전달됨'
-              : '🤖 AI 에게 분석 요청'}
+              ? '✓ Sent to AI'
+              : '🤖 Ask AI to Analyze'}
         </button>
         <button
           onClick={dismiss}
           className="px-2 py-1.5 rounded text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-300"
         >
-          무시
+          Dismiss
         </button>
       </div>
     </div>

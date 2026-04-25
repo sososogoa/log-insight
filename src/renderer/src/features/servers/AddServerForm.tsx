@@ -121,7 +121,7 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
 
   async function handleTestConnection(): Promise<void> {
     if (!form.host.trim() || !form.username.trim()) {
-      setErrors((e) => ({ ...e, host: 'host와 username을 입력하세요' }))
+      setErrors((e) => ({ ...e, host: 'Enter host and username' }))
       return
     }
     setTestState('testing')
@@ -351,7 +351,7 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
       <div className="flex gap-1">
         <input
           className={inputCls()}
-          placeholder="로컬 프로젝트 경로 (선택)"
+          placeholder="Local project path (optional)"
           value={form.localProjectPath}
           onChange={(e) => setForm((f) => ({ ...f, localProjectPath: e.target.value }))}
           readOnly
@@ -366,7 +366,7 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
       </div>
       {form.localProjectPath && (
         <p className="text-[10px] text-neutral-500 -mt-0.5">
-          서버 연결 시 터미널이 이 경로로 자동 이동합니다
+          Terminal will automatically cd to this path when connecting to the server
         </p>
       )}
 
@@ -397,13 +397,13 @@ export function AddServerForm({ onSave, initialProfile }: Props): JSX.Element {
                 : 'border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-neutral-400'
           }`}
         >
-          {testState === 'testing' ? '연결 중…' : testState === 'ok' ? '✓ 연결 성공' : testState === 'fail' ? '✗ 연결 실패' : 'Test Connection'}
+          {testState === 'testing' ? 'Connecting…' : testState === 'ok' ? '✓ Connected' : testState === 'fail' ? '✗ Connection failed' : 'Test Connection'}
         </button>
         <button
           type="submit"
           className="flex-1 bg-neutral-800 hover:bg-neutral-700 rounded px-2 py-1 text-xs text-neutral-200 transition-colors"
         >
-          {isEditing ? '수정 저장' : 'Save'}
+          {isEditing ? 'Save changes' : 'Save'}
         </button>
       </div>
       {testState === 'fail' && testError && (

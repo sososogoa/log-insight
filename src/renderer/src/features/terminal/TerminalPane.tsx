@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTerminalStore } from '@renderer/store/terminal'
 import { TerminalView } from './TerminalView'
 
@@ -9,10 +9,15 @@ export function TerminalPane(): JSX.Element {
   const [showHint, setShowHint] = useState(
     () => !localStorage.getItem(HINT_KEY)
   )
+  const creatingRef = useRef(false)
 
   useEffect(() => {
-    if (sessions.length === 0) {
-      void window.api.terminal.create().then((s) => add(s))
+    if (sessions.length === 0 && !creatingRef.current) {
+      creatingRef.current = true
+      void window.api.terminal.create().then((s) => {
+        add(s)
+        creatingRef.current = false
+      })
     }
   }, [sessions.length, add])
 
@@ -70,16 +75,16 @@ export function TerminalPane(): JSX.Element {
       {showHint && (
         <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900/80 border-b border-neutral-800 text-[11px] text-neutral-400 shrink-0">
           <span className="flex-1">
-            이 터미널에서{' '}
+            Run an AI CLI like{' '}
             <code className="text-neutral-300 bg-neutral-800 px-1 rounded">claude</code>
-            {' '}또는{' '}
+            {' '}or{' '}
             <code className="text-neutral-300 bg-neutral-800 px-1 rounded">codex</code>
-            와 같은 AI CLI 를 실행하면, 로그 선택 후 Ask AI 버튼으로 컨텍스트를 바로 전달할 수 있습니다.
+            {' '}in this terminal, then select log lines and click Ask AI to inject context directly.
           </span>
           <button
             onClick={dismissHint}
             className="text-neutral-500 hover:text-neutral-200 shrink-0 transition-colors"
-            title="닫기"
+            title="Dismiss"
           >
             ×
           </button>

@@ -64,7 +64,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
   const focusInstructionTick = useUiStore((s) => s.focusInstructionTick)
   const bookmarkTick = useUiStore((s) => s.bookmarkTick)
 
-  // selector 범위를 좁히기 위해 selected 만 따로 구독
+  // subscribe only to selected to narrow selector scope
   const selected = useCanvasesStore(
     (s) => s.byId[canvasId]?.selected ?? EMPTY_SET
   )
@@ -73,7 +73,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
   const selectedRef = useRef(selected)
   selectedRef.current = selected
 
-  // ⌘C — 활성 캔버스에서만 복사 (비활성 캔버스는 리스너 달아도 조기 return)
+  // ⌘C — copy only from active canvas (inactive canvases return early even with listener)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent): void {
       if (!isActive) return
@@ -140,7 +140,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
     })
   }, [filtered, canvas?.grouping, canvas?.focusFingerprint, canvas?.expandedGroups])
 
-  // 소스 수 많을 땐 measureElement 오버헤드 감소 위해 estimate 모드로
+  // use estimate mode to reduce measureElement overhead when there are many sources
   const heavyMode = sources.length >= 4
 
   const virtualizer = useVirtualizer({
@@ -155,7 +155,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
     virtualizer.scrollToIndex(rows.length - 1, { align: 'end' })
   }, [rows.length, selected.size, virtualizer])
 
-  // ⌘/ 요청 — 활성 캔버스에서만 반응
+  // ⌘/ request — respond only from active canvas
   useEffect(() => {
     if (focusInstructionTick === 0 || !isActive) return
     if (selectedRef.current.size === 0) return
@@ -165,7 +165,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusInstructionTick])
 
-  // ⌘B 요청 — 활성 캔버스에서만 반응
+  // ⌘B request — respond only from active canvas
   useEffect(() => {
     if (bookmarkTick === 0 || !isActive) return
     void bookmarkSelection()
@@ -278,7 +278,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
       .map((l) => l.text)
     if (chosen.length > MAX_AI_LINES) {
       const ok = window.confirm(
-        `${chosen.length}개 라인을 전송합니다 (처음 ${MAX_AI_LINES}개만 사용). 계속할까요?`
+        `Sending ${chosen.length} lines (only the first ${MAX_AI_LINES} will be used). Continue?`
       )
       if (!ok) return
     }
@@ -289,7 +289,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
       payload
     })
     if (!result.ok) {
-      setSendError('전송 실패: 터미널 세션을 찾을 수 없습니다')
+      setSendError('Send failed: terminal session not found')
       setTimeout(() => setSendError(''), 3000)
       return
     }
@@ -371,7 +371,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
           <button
             onClick={() => void bookmarkSelection()}
             className="px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 hover:bg-neutral-700 shrink-0"
-            title="북마크 저장 (⌘B)"
+            title="Save bookmark (⌘B)"
           >
             🔖
           </button>
@@ -386,7 +386,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
                 setDraftInstruction(instruction)
                 setEditingInstruction(false)
               }}
-              placeholder="instruction · / 로 템플릿"
+              placeholder="instruction · / for templates"
             />
           ) : (
             <button
@@ -395,7 +395,7 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
                 setEditingInstruction(true)
               }}
               className="flex-1 text-left text-neutral-500 hover:text-neutral-300 truncate"
-              title="클릭해 편집 · / 입력 시 템플릿"
+              title="Click to edit · type / for templates"
             >
               {instruction}
             </button>
@@ -414,11 +414,11 @@ function CanvasInner({ canvasId }: Props): JSX.Element | null {
               disabled={!activeTerminalId}
               title={
                 !activeTerminalId
-                  ? '터미널을 먼저 여세요'
-                  : '선택 로그를 AI 에 주입'
+                  ? 'Open a terminal first'
+                  : 'Inject selected logs into AI'
               }
             >
-              {sent ? '전송됨 ✓' : '🤖 Ask AI'}
+              {sent ? 'Sent ✓' : '🤖 Ask AI'}
             </button>
           )}
         </div>

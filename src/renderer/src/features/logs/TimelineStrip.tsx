@@ -3,11 +3,11 @@ import type { LogLine } from '@shared/types'
 
 interface Props {
   lines: LogLine[]
-  /** 어떤 시간 범위를 그릴 것인지(ms). 기본: 최근 120s */
+  /** Time range to render (ms). Default: last 120s. */
   windowMs?: number
-  /** 세그먼트 수 */
+  /** Number of segments. */
   segments?: number
-  /** 세그먼트 클릭 시 호출 — 해당 구간 첫 로그 idx 를 함께 전달 */
+  /** Called on segment click — passes the index of the first log in that interval. */
   onSeek?: (lineIdx: number) => void
 }
 
@@ -85,7 +85,7 @@ export function TimelineStrip({
     <div className="h-[18px] bg-neutral-900/30 border-b border-neutral-800/80 flex items-end px-0.5 gap-px select-none">
       {buckets.map((b, i) => {
         const h = (b.count / peak) * 14
-        // 지배 레벨: error > warn > info > other
+        // dominant level: error > warn > info > other
         const dom: Level =
           b.byLevel.error > 0
             ? 'error'

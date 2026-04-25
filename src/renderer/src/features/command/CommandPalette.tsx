@@ -19,7 +19,7 @@ export function CommandPalette({ ctx }: Props): JSX.Element | null {
   const [active, setActive] = useState(0)
   const [tick, setTick] = useState(0)
 
-  // 팔레트 열릴 때마다 커맨드 재생성 (store 상태 반영)
+  // regenerate commands each time the palette opens (reflects current store state)
   useEffect(() => {
     if (open) {
       setActive(0)
@@ -30,7 +30,7 @@ export function CommandPalette({ ctx }: Props): JSX.Element | null {
 
   const all = useMemo<CommandItem[]>(
     () => buildCommands(ctx),
-    // `tick` 을 포함해 open 시점의 최신 상태 반영
+    // include `tick` to reflect latest store state at open time
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ctx, tick]
   )
@@ -80,7 +80,7 @@ export function CommandPalette({ ctx }: Props): JSX.Element | null {
     grouped.get(g)!.push(s)
   }
 
-  // Flat index map → 그룹 표시 하에서도 키보드 네비게이션이 맞도록
+  // flat index map → so keyboard navigation stays correct under grouped display
   const flat: ScoredItem[] = []
   for (const list of grouped.values()) for (const s of list) flat.push(s)
 
@@ -116,7 +116,7 @@ export function CommandPalette({ ctx }: Props): JSX.Element | null {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="명령을 검색하세요 · Esc 닫기 · ↑↓ 이동 · ⏎ 실행"
+            placeholder="Search commands · Esc close · ↑↓ navigate · ⏎ run"
             className="flex-1 bg-transparent outline-none text-sm text-neutral-100 placeholder:text-neutral-500"
           />
           <span className="text-[10px] text-neutral-600 border border-neutral-700 rounded px-1.5 py-0.5 uppercase tracking-wider">
@@ -130,7 +130,7 @@ export function CommandPalette({ ctx }: Props): JSX.Element | null {
         >
           {flat.length === 0 && (
             <div className="px-4 py-8 text-center text-sm text-neutral-500">
-              일치하는 명령이 없습니다
+              No matching commands
             </div>
           )}
           {Array.from(grouped.entries()).map(([group, list]) => {
@@ -181,10 +181,10 @@ export function CommandPalette({ ctx }: Props): JSX.Element | null {
         </div>
 
         <div className="px-3 py-1.5 border-t border-neutral-800 flex items-center gap-3 text-[10px] text-neutral-500">
-          <span>↑↓ 이동</span>
-          <span>⏎ 실행</span>
-          <span>Esc 닫기</span>
-          <span className="ml-auto">{flat.length} 명령</span>
+          <span>↑↓ navigate</span>
+          <span>⏎ run</span>
+          <span>Esc close</span>
+          <span className="ml-auto">{flat.length} commands</span>
         </div>
       </div>
     </div>

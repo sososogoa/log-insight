@@ -66,7 +66,7 @@ function Tab({
             onSplitRight()
           }}
           className="text-neutral-500 hover:text-blue-300 w-3.5 leading-none"
-          title="오른쪽으로 분할"
+          title="Split right"
         >
           ⇥
         </button>
@@ -76,7 +76,7 @@ function Tab({
             onSplitDown()
           }}
           className="text-neutral-500 hover:text-blue-300 w-3.5 leading-none"
-          title="아래로 분할"
+          title="Split down"
         >
           ⤓
         </button>
@@ -86,7 +86,7 @@ function Tab({
             onFloat()
           }}
           className="text-neutral-500 hover:text-cyan-300 w-3.5 leading-none"
-          title="창 분리 (pop-out)"
+          title="Pop out"
         >
           ⎋
         </button>
@@ -96,7 +96,7 @@ function Tab({
             onMinimize()
           }}
           className="text-neutral-500 hover:text-neutral-200 w-3.5 leading-none"
-          title={canvas.minimized ? '복원' : '최소화'}
+          title={canvas.minimized ? 'Restore' : 'Minimize'}
         >
           {canvas.minimized ? '▢' : '_'}
         </button>
@@ -106,7 +106,7 @@ function Tab({
             onClose()
           }}
           className="text-neutral-500 hover:text-red-400 w-3.5 leading-none"
-          title="닫기"
+          title="Close"
         >
           ×
         </button>
@@ -219,8 +219,8 @@ function CanvasLeafInner({ leaf }: Props): JSX.Element {
         ))}
         {(!activeCanvas || activeCanvas.minimized) && (
           <div className="h-full flex flex-col items-center justify-center text-neutral-500 text-[11px] gap-2">
-            <div>캔버스가 없습니다</div>
-            <div>좌측 서버에서 ▶ 를 누르거나 탭을 여기로 드래그하세요</div>
+            <div>No canvas</div>
+            <div>Press ▶ in the server panel or drag a tab here</div>
           </div>
         )}
       </div>

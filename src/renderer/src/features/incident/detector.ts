@@ -95,7 +95,7 @@ export function detectIncident(
     errorCount: recentErrors,
     warnCount: recentWarns,
     baselinePerMin,
-    sampleErrors: errorSamples.reverse(), // 시간 순
+    sampleErrors: errorSamples.reverse(), // chronological order
     windowLineIds: windowIds,
     topSourceId
   }

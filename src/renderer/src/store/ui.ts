@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 
 interface UiState {
-  /** increments → LogViewer 가 instruction 편집 모드 진입 + 포커스 */
+  /** increments → LogViewer enters instruction edit mode and focuses */
   focusInstructionTick: number
-  /** increments → FilterPanel 검색 인풋 포커스 */
+  /** increments → FilterPanel search input focuses */
   focusSearchTick: number
-  /** increments → 현재 선택을 북마크로 저장 요청 */
+  /** increments → request to save current selection as bookmark */
   bookmarkTick: number
   requestFocusInstruction: () => void
   requestFocusSearch: () => void

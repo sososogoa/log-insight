@@ -200,7 +200,7 @@ export default function App(): JSX.Element {
         <button
           onClick={toggleBookmarks}
           className="hover:text-neutral-300 transition-colors"
-          title="북마크 열기 (⌘B, 선택 없을 때)"
+          title="Open Bookmarks (⌘B, when nothing selected)"
         >
           🔖 Bookmarks
           {bookmarksCount > 0 && (
@@ -213,7 +213,7 @@ export default function App(): JSX.Element {
           <kbd className="text-[10px] text-neutral-500 border border-neutral-700 rounded px-1 py-px">
             ⌘K
           </kbd>
-          <span className="text-neutral-500">명령</span>
+          <span className="text-neutral-500">Commands</span>
         </span>
       </footer>
 

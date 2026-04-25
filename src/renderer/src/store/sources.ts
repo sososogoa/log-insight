@@ -41,9 +41,9 @@ function specKey(serverId: string, spec: LogSourceSpec): string {
 
 interface SourcesState {
   sources: ActiveSource[]
-  /** 앱 재시작 시 자동 재연결 대상. subscribe/unsubscribe 와 동기화 유지 */
+  /** Sources to auto-reconnect on app restart. Keep in sync with subscribe/unsubscribe. */
   restoreSpecs: RestoreSpec[]
-  /** 한 번이라도 재연결 루틴이 실행됐는지 — 첫 부팅 가드 */
+  /** Whether the reconnect routine has run at least once — first-boot guard. */
   restoreDone: boolean
   subscribe: (server: ServerProfile, spec: LogSourceSpec) => Promise<void>
   unsubscribe: (sourceId: string) => Promise<void>

@@ -90,7 +90,7 @@ function CanvasToolbarInner({
             <button
               onClick={() => clearLevels(canvas.id)}
               className="text-[10px] text-neutral-500 hover:text-neutral-300 px-1"
-              title="레벨 필터 전체 해제"
+              title="Clear all level filters"
             >
               ×
             </button>
@@ -119,7 +119,7 @@ function CanvasToolbarInner({
           <button
             onClick={() => setShowFilters((v) => !v)}
             className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 tabular-nums"
-            title="필터 목록"
+            title="Filter list"
           >
             {showFilters ? '▾' : '▸'} {canvas.filters.length}f
           </button>
@@ -133,7 +133,7 @@ function CanvasToolbarInner({
               ? 'bg-blue-600/30 border-blue-500/50 text-blue-200'
               : 'border-neutral-700 text-neutral-400 hover:text-neutral-200'
           }`}
-          title="반복 로그를 같은 패턴으로 묶기"
+          title="Group repeated logs by pattern"
         >
           ⊜
         </button>

@@ -59,16 +59,16 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
 
   cmds.push({
     id: 'ai.send',
-    title: '🤖 선택한 로그를 AI에 보내기',
+    title: '🤖 Send selected logs to AI',
     subtitle: hasSelection
-      ? `${active!.selected.size}개 라인 · 활성 캔버스(${active!.title})`
-      : '먼저 로그를 선택하세요',
+      ? `${active!.selected.size} lines · active canvas (${active!.title})`
+      : 'Select log lines first',
     group: 'AI',
     shortcut: '⌘⏎',
     disabled: !hasSelection || !hasActiveTerminal,
     disabledReason: !hasSelection
-      ? '선택된 로그가 없습니다'
-      : '활성 터미널이 없습니다',
+      ? 'No logs selected'
+      : 'No active terminal',
     run: async () => {
       const c = useCanvasesStore.getState()
       const activeCanvas = c.byId[c.activeId]
@@ -93,7 +93,7 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
 
   cmds.push({
     id: 'ai.edit-instruction',
-    title: '✏️  AI 프롬프트 편집',
+    title: '✏️  Edit AI prompt',
     subtitle: active?.customInstruction ?? logsState.instruction,
     group: 'AI',
     shortcut: '⌘/',
@@ -122,14 +122,14 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
     )
     cmds.push({
       id: `server.connect.${server.id}`,
-      title: `▶  ${server.name} 연결`,
+      title: `▶  Connect ${server.name}`,
       subtitle: server.logPath
         ? `${server.username}@${server.host} · ${server.logPath}`
-        : `${server.username}@${server.host} · 로그 경로 필요`,
+        : `${server.username}@${server.host} · log path required`,
       group: 'Server',
       keywords: `${server.host} ${server.env ?? ''} connect`,
       disabled: !server.logPath,
-      disabledReason: '이 서버의 기본 로그 경로가 설정되지 않았습니다',
+      disabledReason: 'Default log path not set for this server',
       run: () => {
         if (!server.logPath) return
         void useSourcesStore
@@ -140,7 +140,7 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
     for (const src of connected) {
       cmds.push({
         id: `server.disconnect.${src.sourceId}`,
-        title: `■  ${server.name} · ${src.path} 연결 해제`,
+        title: `■  Disconnect ${server.name} · ${src.path}`,
         group: 'Server',
         keywords: 'disconnect stop unsubscribe',
         run: () => void useSourcesStore.getState().unsubscribe(src.sourceId)
@@ -153,7 +153,7 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
     if (c.id === canvasesState.activeId) continue
     cmds.push({
       id: `canvas.focus.${c.id}`,
-      title: `◎  ${c.title} 로 이동`,
+      title: `◎  Go to ${c.title}`,
       group: 'Canvas',
       keywords: 'canvas focus switch',
       run: () => useCanvasesStore.getState().setActive(c.id)
@@ -162,7 +162,7 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
   if (active) {
     cmds.push({
       id: 'canvas.minimize',
-      title: active.minimized ? '◻ 현재 캔버스 복원' : '_ 현재 캔버스 최소화',
+      title: active.minimized ? '◻ Restore current canvas' : '_ Minimize current canvas',
       group: 'Canvas',
       run: () => useCanvasesStore.getState().toggleMinimize(active.id)
     })
@@ -170,14 +170,14 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
       id: 'canvas.maximize',
       title:
         canvasesState.maximizedId === active.id
-          ? '◱ 최대화 해제'
-          : '◻ 현재 캔버스 최대화',
+          ? '◱ Unmaximize'
+          : '◻ Maximize current canvas',
       group: 'Canvas',
       run: () => useCanvasesStore.getState().toggleMaximize(active.id)
     })
     cmds.push({
       id: 'canvas.close',
-      title: '× 현재 캔버스 닫기',
+      title: '× Close current canvas',
       group: 'Canvas',
       run: () => useCanvasesStore.getState().close(active.id)
     })
@@ -188,7 +188,7 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
     const isOn = a?.levelFilter.has(level) ?? false
     cmds.push({
       id: `filter.level.${level}`,
-      title: `레벨 필터: ${label} ${isOn ? '끄기' : '켜기'}`,
+      title: `Level filter: ${label} ${isOn ? 'off' : 'on'}`,
       group: 'Filter',
       keywords: `level ${level}`,
       disabled: !a,
@@ -200,8 +200,8 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
   }
   cmds.push({
     id: 'filter.only-errors',
-    title: '에러만 보기',
-    subtitle: '활성 캔버스에서 다른 레벨 해제 후 ERROR 만 ON',
+    title: 'Errors only',
+    subtitle: 'Disable all other levels and enable ERROR in active canvas',
     group: 'Filter',
     keywords: 'only errors error',
     disabled: !active,
@@ -214,7 +214,7 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
   })
   cmds.push({
     id: 'filter.clear-levels',
-    title: '레벨 필터 모두 해제',
+    title: 'Clear all level filters',
     group: 'Filter',
     disabled: !active,
     run: () => {
@@ -224,7 +224,7 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
   })
   cmds.push({
     id: 'filter.focus-search',
-    title: '🔍  로그 키워드 필터로 포커스',
+    title: '🔍  Focus log keyword filter',
     group: 'Filter',
     shortcut: '⌘F',
     run: () => ctx.focusLogSearch()
@@ -233,9 +233,9 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
   cmds.push({
     id: 'view.toggle-grouping',
     title: active?.grouping
-      ? '⊜ 반복 패턴 그루핑 끄기'
-      : '⊜ 반복 패턴 그루핑 켜기',
-    subtitle: '활성 캔버스에만 적용',
+      ? '⊜ Disable repeat pattern grouping'
+      : '⊜ Enable repeat pattern grouping',
+    subtitle: 'Applies to active canvas only',
     group: 'View',
     shortcut: '⌘⇧G',
     keywords: 'group grouping pattern dedupe',
@@ -248,8 +248,8 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
   if (active?.focusFingerprint) {
     cmds.push({
       id: 'view.clear-focus',
-      title: '⊙ Focus 해제',
-      subtitle: '모든 패턴 다시 보기',
+      title: '⊙ Clear Focus',
+      subtitle: 'Show all patterns again',
       group: 'View',
       shortcut: 'Esc',
       run: () => {
@@ -261,8 +261,8 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
   if (logsState.traceFilter) {
     cmds.push({
       id: 'view.clear-trace',
-      title: '⟲ Trace 해제',
-      subtitle: `현재: ${logsState.traceFilter}`,
+      title: '⟲ Clear Trace filter',
+      subtitle: `Current: ${logsState.traceFilter}`,
       group: 'View',
       shortcut: 'Esc',
       run: () => useLogsStore.getState().setTraceFilter(null)
@@ -271,7 +271,7 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
 
   cmds.push({
     id: 'session.clear-selection',
-    title: '선택 해제',
+    title: 'Clear selection',
     group: 'Session',
     shortcut: 'Esc',
     disabled: !hasSelection,
@@ -282,15 +282,15 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
   })
   cmds.push({
     id: 'session.clear-logs',
-    title: '모든 로그 버퍼 비우기',
-    subtitle: '화면에서 지우기 · 소스 연결은 유지',
+    title: 'Clear all log buffers',
+    subtitle: 'Clears the display · source connections remain active',
     group: 'Session',
     run: () => useLogsStore.getState().clear()
   })
 
   cmds.push({
     id: 'terminal.new',
-    title: '새 터미널 열기',
+    title: 'New terminal',
     group: 'Terminal',
     run: async () => {
       const s = await window.api.terminal.create()
@@ -301,53 +301,53 @@ export function buildCommands(ctx: CommandContext): CommandItem[] {
     if (t.id === termState.activeId) continue
     cmds.push({
       id: `terminal.activate.${t.id}`,
-      title: `터미널 전환: ${t.title}`,
+      title: `Switch terminal: ${t.title}`,
       group: 'Terminal',
       run: () => useTerminalStore.getState().setActive(t.id)
     })
   }
   cmds.push({
     id: 'terminal.toggle',
-    title: '터미널 패널 토글',
+    title: 'Toggle terminal panel',
     group: 'View',
     run: () => ctx.togglePanel('terminal')
   })
 
   cmds.push({
     id: 'view.toggle-servers',
-    title: 'Servers 패널 토글',
+    title: 'Toggle Servers panel',
     group: 'View',
     run: () => ctx.togglePanel('servers')
   })
   cmds.push({
     id: 'view.toggle-overview',
-    title: 'Overview 레일 토글',
+    title: 'Toggle Overview rail',
     group: 'View',
     run: () => ctx.togglePanel('filters')
   })
 
   cmds.push({
     id: 'bookmark.save',
-    title: '🔖 선택 라인 북마크로 저장',
+    title: '🔖 Save selected lines as bookmark',
     subtitle: hasSelection
-      ? `${active!.selected.size} lines — 메모와 함께 저장`
-      : '먼저 로그를 선택하세요',
+      ? `${active!.selected.size} lines — save with note`
+      : 'Select log lines first',
     group: 'Bookmark',
     shortcut: '⌘B',
     disabled: !hasSelection,
-    disabledReason: '선택된 로그가 없습니다',
+    disabledReason: 'No logs selected',
     run: () => useUiStore.getState().requestBookmark()
   })
   cmds.push({
     id: 'bookmark.open',
-    title: '🔖 북마크 목록 열기',
+    title: '🔖 Open bookmarks',
     group: 'Bookmark',
     run: () => useBookmarksStore.getState().setPanelOpen(true)
   })
   cmds.push({
     id: 'bookmark.export',
-    title: '↑ 북마크를 Markdown 리포트로 내보내기',
-    subtitle: '인시던트 정리 · 공유용',
+    title: '↑ Export bookmarks as Markdown report',
+    subtitle: 'For incident summaries and sharing',
     group: 'Bookmark',
     run: async () => {
       await useBookmarksStore.getState().exportMarkdown()

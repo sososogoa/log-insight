@@ -243,7 +243,7 @@ export const useCanvasesStore = create<CanvasesState>()(
           const canvas = s.byId[canvasId]
           if (!canvas) return s
 
-          // 최소화 자동 해제 (타일/플로팅 공통)
+          // auto-deactivate minimize (applies to both tile and floating)
           let byId = s.byId
           if (canvas.minimized) {
             byId = { ...byId, [canvasId]: { ...canvas, minimized: false } }
@@ -264,7 +264,7 @@ export const useCanvasesStore = create<CanvasesState>()(
             }
           }
 
-          // floating: minimize 해제 + z 상승
+          // floating: clear minimize + raise z
           if (s.floatingIds.includes(canvasId)) {
             const z = s.zCounter + 1
             return {
@@ -394,12 +394,12 @@ export const useCanvasesStore = create<CanvasesState>()(
       moveCanvas: (canvasId, toLeafId, toIndex) =>
         set((s) => {
           if (!s.byId[canvasId]) return s
-          // 트리에서 제거 (floating 이었으면 floating 에서 제거)
+          // remove from tree (also remove from floating if it was floating)
           let layout = removeCanvasFromTree(s.layout, canvasId) ?? { ...defaultLayout }
           const floatingIds = s.floatingIds.filter((id) => id !== canvasId)
-          // 대상 leaf 존재 확인
+          // verify target leaf exists
           if (!findLeafById(layout, toLeafId)) {
-            // 대상 leaf 가 없으면 첫 leaf 에 붙이거나 신규 leaf 생성
+            // if target leaf is gone, attach to first leaf or create a new one
             const firstLeaf = collectLeaves(layout)[0]
             if (firstLeaf) toLeafId = firstLeaf.id
             else {
@@ -427,10 +427,10 @@ export const useCanvasesStore = create<CanvasesState>()(
           const leaf = findLeafOf(s.layout, canvasId)
           if (!leaf) return s
           if (leaf.canvasIds.length === 1) {
-            // 이미 혼자 있는 leaf — 의미 없음
+            // already alone in the leaf — no-op
             return s
           }
-          // 이 canvas 를 leaf 에서 제거 후 새 leaf 로 분할
+          // remove this canvas from the leaf then split into a new leaf
           const layoutRemoved = removeCanvasFromTree(s.layout, canvasId)
           if (!layoutRemoved) return s
           const remainingLeaf = findLeafById(layoutRemoved, leaf.id)
@@ -631,7 +631,7 @@ export const useCanvasesStore = create<CanvasesState>()(
         if (!p?.byId) return current
         const byId: Record<string, CanvasState> = {}
         for (const [id, raw] of Object.entries(p.byId)) {
-          // sourceId 없는 이전 버전의 Merged 캔버스는 무시
+          // skip legacy Merged canvases that have no sourceId
           if (!raw.sourceId || raw.sourceId === '__merged__') continue
           byId[id] = {
             id,
@@ -654,7 +654,7 @@ export const useCanvasesStore = create<CanvasesState>()(
 
         let layout: LayoutNode
         if (p.layout) {
-          // 영속화된 layout 에서 사라진 canvasId 정리
+          // clean up canvasIds that are missing from the persisted layout
           layout = removeOrphansFromLayout(p.layout, byId)
           if (!layout) layout = { ...defaultLayout }
         } else {

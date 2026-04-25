@@ -7,51 +7,51 @@ export interface PromptTemplate {
 export const BUILTIN_TEMPLATES: PromptTemplate[] = [
   {
     slash: '/why',
-    label: '원인 분석',
+    label: 'Root Cause',
     prompt:
-      '다음 로그의 근본 원인을 5줄 이내로 분석해줘. 가능성을 확률 순으로 정리하고, 확인할 수 있는 방법도 함께 알려줘:'
+      'Analyze the root cause of the following logs in 5 lines or fewer. List possibilities in order of likelihood and suggest how to verify each:'
   },
   {
     slash: '/fix',
-    label: '수정 제안',
+    label: 'Fix Suggestion',
     prompt:
-      '다음 에러를 수정하기 위한 구체적인 코드 변경을 제안해줘. 언어는 로그에서 추론하고, diff 형태로 보여줘:'
+      'Suggest specific code changes to fix the following error. Infer the language from the logs and show the diff:'
   },
   {
     slash: '/summary',
-    label: '요약',
+    label: 'Summary',
     prompt:
-      '다음 로그를 3~5줄로 요약해줘. 주요 이벤트 · 레벨별 개수 · 시간대 · 이상 징후를 포함:'
+      'Summarize the following logs in 3–5 lines. Include key events, counts by level, time range, and any anomalies:'
   },
   {
     slash: '/incident',
-    label: '인시던트 리포트',
+    label: 'Incident Report',
     prompt:
-      '다음 로그로 인시던트 리포트를 작성해줘. 형식:\n- 발생 시각\n- 영향 범위\n- 추정 원인\n- 즉시 조치\n- 후속 확인 사항'
+      'Write an incident report from the following logs. Format:\n- Time of occurrence\n- Blast radius\n- Estimated cause\n- Immediate action\n- Follow-up items'
   },
   {
     slash: '/stack',
-    label: '스택트레이스 추적',
+    label: 'Stack Trace',
     prompt:
-      '스택트레이스가 있다면 발생 지점 파일·라인과 호출 경로를 정리하고, 가장 위쪽 프레임의 책임을 설명해줘:'
+      'If a stack trace is present, identify the file and line of origin, summarize the call path, and explain the responsibility of the top frame:'
   },
   {
     slash: '/diff',
-    label: '이상 패턴만',
+    label: 'Anomalies Only',
     prompt:
-      '다음 로그에서 평소와 다른 패턴, 새로 등장한 메시지, 급증한 에러만 추려서 보여줘. 정상 noise 는 제외:'
+      'Show only unusual patterns, newly appearing messages, and spiking errors from the following logs. Exclude normal noise:'
   },
   {
     slash: '/perf',
-    label: '성능 이슈',
+    label: 'Performance',
     prompt:
-      '다음 로그에서 성능 병목(지연 · timeout · 대기)이 의심되는 부분을 찾아줘. 레이턴시 숫자가 있다면 비교해줘:'
+      'Identify suspected performance bottlenecks (latency · timeout · blocking) in the following logs. Compare latency numbers if present:'
   },
   {
     slash: '/secure',
-    label: '보안 이슈',
+    label: 'Security',
     prompt:
-      '다음 로그에서 인증 실패, 권한 위반, 의심스러운 접근 패턴을 확인해줘:'
+      'Check the following logs for authentication failures, authorization violations, and suspicious access patterns:'
   }
 ]
 

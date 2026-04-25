@@ -2,16 +2,16 @@ import type React from 'react'
 import { renderWithTraceIds } from './traceHighlight'
 
 /**
- * 로그에서 "파일경로:라인" 또는 "파일경로:라인:열" 패턴을 감지해
- * 클릭 가능한 코드 점프 링크로 렌더링한다.
+ * Detects "filepath:line" or "filepath:line:column" patterns in log text
+ * and renders them as clickable code-jump links.
  *
- * 감지 예:
+ * Examples:
  *   - /var/app/src/api/users.ts:42
  *   - src/api/users.ts:42:18
  *   - ./lib/db.js:137
  *   - utils\helpers.py:10
  *
- * 조건을 보수적으로: 확장자가 알려진 소스 코드 확장자여야 함 (false positive 감소).
+ * Conservative matching: extension must be a known source code extension (reduces false positives).
  */
 const EXT =
   '(?:tsx?|jsx?|mjs|cjs|py|go|rs|rb|java|kt|kts|swift|cpp|cc|cxx|hpp|hh|h|c|cs|php|scala|sh|bash|zsh|sql|yml|yaml|toml|json)'
@@ -29,7 +29,7 @@ export interface CodeLocation {
 function parseLoc(match: string): CodeLocation | null {
   const parts = match.split(':')
   if (parts.length < 2) return null
-  // Windows-style 경로면 첫 토큰이 드라이브 레터("C"). 그 경우 path 는 앞 2 토큰을 합침
+  // Windows-style path: first token is a drive letter ("C"), so path combines the first two tokens
   let path: string
   let lineStr: string
   let colStr: string | undefined
@@ -55,7 +55,7 @@ export function renderRichLogText(
     onCodeJump?: (loc: CodeLocation) => void
   }
 ): React.ReactNode {
-  // 1) 코드 점프 토큰 추출 → 사이 조각은 trace highlight 에 맡김
+  // 1) extract code-jump tokens → delegate gaps to trace highlight
   const nodes: React.ReactNode[] = []
   let lastIdx = 0
   FILE_LINE_RE.lastIndex = 0
@@ -75,7 +75,7 @@ export function renderRichLogText(
             opts.onCodeJump!(loc)
           }}
           className="inline-block align-baseline font-mono text-[12px] text-violet-300 hover:text-violet-200 hover:bg-violet-500/10 rounded px-0.5 -mx-0.5 cursor-pointer underline decoration-dotted underline-offset-2"
-          title={`에디터로 열기 · ${loc.path}:${loc.line}`}
+          title={`Open in editor · ${loc.path}:${loc.line}`}
         >
           {m[0]}
         </button>

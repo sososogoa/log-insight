@@ -3,13 +3,13 @@ import { useLogsStore } from '@renderer/store/logs'
 
 interface Props {
   sourceId: string
-  /** badge 스타일 — compact(탭 용) / dock(칩 용) */
+  /** Badge style — compact (for tabs) / dock (for chips). */
   variant?: 'compact' | 'dock'
 }
 
 /**
- * 이 컴포넌트의 목적: **자신의 sourceId 에 해당하는 소스 버퍼만 구독**.
- * 다른 소스 변경으로 인한 CanvasHost/CanvasLeaf 의 리렌더를 막기 위해 분리.
+ * Purpose: subscribe **only to the source buffer for its own sourceId**.
+ * Isolated to prevent CanvasHost/CanvasLeaf re-renders caused by other source changes.
  */
 function TabErrorBadgeInner({ sourceId, variant = 'compact' }: Props): JSX.Element | null {
   const bucket = useLogsStore((s) => s.sourceLines[sourceId])

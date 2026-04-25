@@ -26,7 +26,7 @@ body,
   @apply py-0.5 text-[13px] leading-5 flex items-start text-neutral-300;
 }
 
-/* 스크롤바 숨김 (콘텐츠는 스크롤됨) */
+/* hide scrollbar (content still scrollable) */
 .scrollbar-hidden {
   scrollbar-width: none;
 }

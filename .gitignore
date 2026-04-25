@@ -10,3 +10,7 @@ build/dist/
 .idea/
 # electron-builder output
 release/
+# TypeScript build cache
+*.tsbuildinfo
+# internal product/strategy docs
+PRODUCT.md

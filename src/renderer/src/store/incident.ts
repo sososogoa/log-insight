@@ -2,11 +2,11 @@ import { create } from 'zustand'
 import type { Incident } from '@renderer/features/incident/detector'
 
 interface IncidentState {
-  /** 감지됐지만 아직 dismiss 되지 않은 가장 최근 인시던트 */
+  /** Most recent incident that has been detected but not yet dismissed. */
   active: Incident | null
-  /** dismiss 된 id 모음 — 같은 minute bucket 은 재트리거 방지 */
+  /** Set of dismissed ids — prevents re-triggering within the same minute bucket. */
   dismissedBuckets: Set<string>
-  /** 이 시각 이전까지는 감지 결과를 무시 (일시 음소거) */
+  /** Detection results before this timestamp are ignored (temporary mute). */
   silentUntil: number
 
   report: (incident: Incident) => void
@@ -16,7 +16,7 @@ interface IncidentState {
 }
 
 function bucketKey(startTs: number): string {
-  // 1분 bucket
+  // 1-minute bucket
   return String(Math.floor(startTs / 60_000))
 }
 
@@ -30,7 +30,7 @@ export const useIncidentStore = create<IncidentState>((set, get) => ({
     if (Date.now() < s.silentUntil) return
     const bucket = bucketKey(incident.startTs)
     if (s.dismissedBuckets.has(bucket)) return
-    // 이미 같은 인시던트가 활성화되어 있으면 새 데이터로 갱신만
+    // if the same incident is already active, just update with new data
     if (s.active && bucketKey(s.active.startTs) === bucket) {
       set({ active: { ...incident, id: s.active.id } })
       return

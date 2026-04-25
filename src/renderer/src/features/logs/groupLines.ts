@@ -5,13 +5,13 @@ export type VisibleRow =
   | { kind: 'single'; line: LogLine; fingerprint: string }
   | {
       kind: 'group'
-      /** 대표 라인 (가장 최근) */
+      /** Representative line (most recent). */
       line: LogLine
-      /** 해당 그룹의 모든 id (선택/AI 전송 시 사용) */
+      /** All ids in this group (used for selection/AI send). */
       ids: string[]
       count: number
       fingerprint: string
-      /** 그룹 헤더의 안정 id — 가장 오래된 라인 id 사용 */
+      /** Stable id for the group header — uses the oldest line's id. */
       groupId: string
       firstTs: number
       lastTs: number
@@ -20,20 +20,20 @@ export type VisibleRow =
       kind: 'group-child'
       line: LogLine
       fingerprint: string
-      /** 속한 그룹 id */
+      /** Id of the group this line belongs to. */
       groupId: string
     }
 
 export interface GroupingResult {
   rows: VisibleRow[]
-  /** fingerprint → 원본 라인 총 개수 (상단 패턴 인사이트 등) */
+  /** fingerprint → total original line count (for top-level pattern insights, etc.) */
   fingerprintCounts: Map<string, number>
 }
 
 /**
- * 연속(consecutive) 로그 그루핑.
- * 같은 fingerprint 가 이어지면 하나의 그룹으로 묶는다.
- * expanded 그룹은 헤더 + 자식 라인들로 평탄화되어 가상 스크롤에서 그대로 사용 가능.
+ * Consecutive log grouping.
+ * Consecutive lines with the same fingerprint are merged into one group.
+ * Expanded groups are flattened to header + child lines, ready for use in virtual scroll.
  */
 export function groupLines(
   lines: LogLine[],

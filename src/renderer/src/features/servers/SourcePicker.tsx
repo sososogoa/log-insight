@@ -127,24 +127,24 @@ export function SourcePicker({
         <div className="space-y-1.5">
           {dockerLoading && (
             <div className="text-[11px] text-neutral-500 italic px-1">
-              컨테이너 목록 조회 중…
+              Loading container list…
             </div>
           )}
           {!dockerLoading && dockerResult?.unavailable && (
             <div className="text-[11px] text-red-400/90 px-1 py-1 whitespace-pre-wrap leading-snug">
-              {dockerResult.error || 'Docker 를 사용할 수 없습니다.'}
+              {dockerResult.error || 'Docker is unavailable.'}
             </div>
           )}
           {!dockerLoading && dockerResult && !dockerResult.unavailable && dockerResult.containers.length === 0 && (
             <div className="text-[11px] text-neutral-500 px-1">
-              실행 중인 컨테이너가 없습니다.
+              No running containers.
             </div>
           )}
           {!dockerLoading && dockerResult && dockerResult.containers.length > 0 && (
             <>
               {dockerResult.sudoRequired && (
                 <div className="text-[10px] text-amber-300/90 px-1">
-                  ℹ sudo 권한으로 접근 중입니다
+                  ℹ Accessing with sudo privileges
                 </div>
               )}
               <select
@@ -180,7 +180,7 @@ export function SourcePicker({
                 <button
                   onClick={() => void loadDocker()}
                   className="text-[11px] text-neutral-500 hover:text-neutral-300 ml-auto"
-                  title="컨테이너 목록 새로고침"
+                  title="Refresh container list"
                 >
                   ↻ refresh
                 </button>
@@ -192,7 +192,7 @@ export function SourcePicker({
               onClick={() => void loadDocker()}
               className="text-[11px] px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 w-full"
             >
-              컨테이너 목록 불러오기
+              Load container list
             </button>
           )}
         </div>
@@ -212,12 +212,12 @@ export function SourcePicker({
           />
           <input
             className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-neutral-500"
-            placeholder="표시명 (선택): myapp-journal"
+            placeholder="Display name (optional): myapp-journal"
             value={customLabel}
             onChange={(e) => setCustomLabel(e.target.value)}
           />
           <div className="text-[10px] text-neutral-500">
-            ⚠ SSH 세션에서 그대로 실행됩니다. 명령 안전성은 서버 정책 책임.
+            ⚠ Executed as-is in the SSH session. Command safety is the server's responsibility.
           </div>
         </div>
       )}

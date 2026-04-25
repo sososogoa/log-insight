@@ -11,9 +11,9 @@ export interface HotkeyCallbacks {
 }
 
 // ⌘K is owned by the native app menu (see main/menu.ts).
-// ⌘/   AI 프롬프트 포커스 · ⌘F 필터 검색 · ⌘⇧E 에러만 · ⌘⇧G 그루핑
-// ⌘B   선택 → 북마크 / 없으면 패널 토글
-// Esc  선택 → Focus → TraceFilter 순 해제
+// ⌘/   focus AI prompt · ⌘F focus log search · ⌘⇧E errors only · ⌘⇧G grouping
+// ⌘B   selection → bookmark / toggle panel if nothing selected
+// Esc  clear in order: selection → Focus → TraceFilter
 export function useGlobalHotkeys(cb: HotkeyCallbacks): void {
   useEffect(() => {
     const offMenu = window.api.menu.onCommandPalette(() =>
@@ -28,21 +28,21 @@ export function useGlobalHotkeys(cb: HotkeyCallbacks): void {
           target.tagName === 'TEXTAREA' ||
           target.isContentEditable)
 
-      // ⌘/ — instruction 포커스
+      // ⌘/ — focus instruction
       if (mod && !e.shiftKey && e.key === '/') {
         e.preventDefault()
         cb.focusInstruction()
         return
       }
 
-      // ⌘F — 로그 검색 포커스
+      // ⌘F — focus log search
       if (mod && !e.shiftKey && e.key.toLowerCase() === 'f' && !inEditable) {
         e.preventDefault()
         cb.focusLogSearch()
         return
       }
 
-      // ⌘⇧E — 활성 캔버스에서 에러만 보기
+      // ⌘⇧E — show errors only in active canvas
       if (mod && e.shiftKey && e.key.toLowerCase() === 'e') {
         e.preventDefault()
         const c = useCanvasesStore.getState()
@@ -55,7 +55,7 @@ export function useGlobalHotkeys(cb: HotkeyCallbacks): void {
         return
       }
 
-      // ⌘⇧G — 활성 캔버스 그루핑 토글
+      // ⌘⇧G — toggle grouping in active canvas
       if (mod && e.shiftKey && e.key.toLowerCase() === 'g') {
         e.preventDefault()
         const c = useCanvasesStore.getState()
@@ -63,7 +63,7 @@ export function useGlobalHotkeys(cb: HotkeyCallbacks): void {
         return
       }
 
-      // ⌘B — 북마크
+      // ⌘B — bookmark
       if (mod && !e.shiftKey && e.key.toLowerCase() === 'b' && !inEditable) {
         e.preventDefault()
         const c = useCanvasesStore.getState()
@@ -76,7 +76,7 @@ export function useGlobalHotkeys(cb: HotkeyCallbacks): void {
         return
       }
 
-      // Esc — 선택/Focus/Trace 순차 해제
+      // Esc — clear selection/Focus/Trace in order
       if (e.key === 'Escape' && !inEditable) {
         const cmd = useCommandStore.getState()
         if (cmd.open) return

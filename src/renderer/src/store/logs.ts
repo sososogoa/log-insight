@@ -5,7 +5,7 @@ import type { FilterRule, LogLevel, LogLine } from '@shared/types'
 const MAX_LINES_PER_SOURCE = 2000
 const MAX_LINES_TOTAL = 10000
 
-const DEFAULT_INSTRUCTION = '다음 로그의 원인과 수정 방향을 분석해줘:'
+const DEFAULT_INSTRUCTION = 'Analyze the cause of the following logs and suggest a fix:'
 
 interface LogsState {
   sourceLines: Record<string, LogLine[]>

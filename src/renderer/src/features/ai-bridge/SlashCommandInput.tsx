@@ -27,7 +27,7 @@ export const SlashCommandInput = forwardRef<SlashCommandInputHandle, Props>(
       focus: () => inputRef.current?.focus()
     }))
 
-    // 슬래시 드롭다운은 value 가 / 로 시작하고 공백이 없을 때만
+    // show slash dropdown only when value starts with / and has no spaces
     const slashQuery =
       value.startsWith('/') && !value.includes(' ') ? value : ''
     const suggestions: PromptTemplate[] = slashQuery ? matchSlash(slashQuery) : []
@@ -42,7 +42,7 @@ export const SlashCommandInput = forwardRef<SlashCommandInputHandle, Props>(
       setOpenMenu(false)
       requestAnimationFrame(() => {
         inputRef.current?.focus()
-        // 커서를 끝으로 이동
+        // move cursor to end
         const len = t.prompt.length
         inputRef.current?.setSelectionRange(len, len)
       })
@@ -92,7 +92,7 @@ export const SlashCommandInput = forwardRef<SlashCommandInputHandle, Props>(
             }
           }}
           onBlur={() => {
-            // 메뉴 클릭 체인을 주지 않기 위해 살짝 delay
+            // slight delay to avoid interrupting menu click chain
             setTimeout(() => {
               if (!document.activeElement?.closest('[data-slash-menu]')) {
                 setOpenMenu(false)
@@ -108,7 +108,7 @@ export const SlashCommandInput = forwardRef<SlashCommandInputHandle, Props>(
             className="absolute left-0 right-0 top-full mt-1 z-30 rounded-md bg-neutral-900 border border-neutral-700 shadow-2xl max-h-[240px] overflow-auto"
           >
             <div className="px-2 py-1 text-[10px] uppercase tracking-wider text-neutral-500 border-b border-neutral-800">
-              프롬프트 템플릿 · ↑↓ 이동 · ⏎/Tab 선택
+              Prompt templates · ↑↓ navigate · ⏎/Tab select
             </div>
             {suggestions.map((t, i) => (
               <button

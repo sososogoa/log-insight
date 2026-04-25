@@ -32,7 +32,7 @@ export function ServerTree(): JSX.Element {
     }
     await remove(serverId)
     setConfirmDelete(null)
-    // 편집 중이던 대상이 삭제되면 폼도 함께 닫아야 함
+    // close the form if the server being edited is deleted
     if (editingServer?.id === serverId) setEditingServer(null)
     if (pickerFor === serverId) setPickerFor(null)
   }
@@ -88,16 +88,16 @@ export function ServerTree(): JSX.Element {
         {servers.length === 0 && !showForm && (
           <li className="px-4 py-8 flex flex-col items-center gap-3 text-center">
             <div className="text-neutral-400 text-[11px] leading-relaxed">
-              SSH로 원격 서버 로그를<br />실시간으로 스트리밍합니다
+              Stream remote server logs in<br />real-time over SSH
             </div>
             <button
               onClick={() => setShowForm(true)}
               className="px-3 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs transition-colors"
             >
-              + 첫 서버 추가
+              + Add first server
             </button>
             <div className="text-neutral-500 text-[10px] leading-relaxed">
-              /var/log/*.log 파일을<br />tail -F로 구독합니다
+              Subscribes to /var/log/*.log<br />files via tail -F
             </div>
           </li>
         )}
@@ -198,7 +198,7 @@ export function ServerTree(): JSX.Element {
                     {src.status === 'error' && (
                       <div className="pl-4 pr-2 pb-1.5 space-y-0.5">
                         <p className="text-[10px] text-red-400/80 leading-snug break-all">
-                          {src.error ?? '연결 오류'}
+                          {src.error ?? 'Connection error'}
                         </p>
                         <button
                           onClick={async () => {
@@ -208,7 +208,7 @@ export function ServerTree(): JSX.Element {
                           }}
                           className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-400 transition-colors"
                         >
-                          재시도
+                          Retry
                         </button>
                       </div>
                     )}

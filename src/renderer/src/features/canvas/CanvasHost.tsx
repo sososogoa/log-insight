@@ -148,7 +148,7 @@ function CanvasHostInner(): JSX.Element {
         <button
           onClick={() => setShowPresetMenu((v) => !v)}
           className="hover:text-neutral-200"
-          title="워크스페이스 프리셋"
+          title="Workspace presets"
         >
           ▦ Workspace
         </button>
@@ -164,9 +164,9 @@ function CanvasHostInner(): JSX.Element {
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-neutral-500 text-sm gap-2 p-4 text-center">
             <div className="text-2xl">📡</div>
-            <div>{hasAnyCanvas ? '타일에 표시할 캔버스가 없습니다' : '아직 연결된 소스가 없습니다'}</div>
+            <div>{hasAnyCanvas ? 'No canvas to display in the tile' : 'No sources connected yet'}</div>
             <div className="text-[11px] text-neutral-600">
-              좌측 서버에서 ▶ 를 눌러 로그 스트림을 시작하세요
+              Press ▶ in the server panel to start a log stream
             </div>
           </div>
         )}
@@ -186,7 +186,7 @@ function CanvasHostInner(): JSX.Element {
               key={d.canvasId}
               onClick={d.onRestore}
               className="flex items-center gap-1 px-2 py-0.5 rounded bg-neutral-900 hover:bg-neutral-800 text-neutral-300 shrink-0"
-              title={`복원: ${d.label}`}
+              title={`Restore: ${d.label}`}
             >
               <span
                 className="w-1.5 h-1.5 rounded-full"

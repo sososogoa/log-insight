@@ -44,7 +44,7 @@ function NoteEditor({
       <input
         ref={inputRef}
         className="w-full mt-0.5 bg-neutral-900 border border-blue-500/40 rounded px-2 py-1 text-[12px] text-neutral-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        placeholder="메모 추가 (Enter 저장 · Esc 취소)"
+        placeholder="Add note (Enter to save · Esc to cancel)"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={() => void commit()}
@@ -70,7 +70,7 @@ function NoteEditor({
         bookmark.note ? 'text-neutral-200' : 'text-neutral-500 italic'
       }`}
     >
-      {bookmark.note ?? '＋ 메모 추가'}
+      {bookmark.note ?? '＋ Add note'}
     </button>
   )
 }
@@ -97,10 +97,10 @@ export function BookmarksPanel(): JSX.Element | null {
   async function doExport(): Promise<void> {
     const res = await exportMd()
     if (res.ok && res.path) {
-      setExportStatus(`저장됨: ${res.path}`)
+      setExportStatus(`Saved: ${res.path}`)
       setTimeout(() => setExportStatus(''), 3000)
     } else {
-      setExportStatus('취소됨')
+      setExportStatus('Cancelled')
       setTimeout(() => setExportStatus(''), 1500)
     }
   }
@@ -115,16 +115,16 @@ export function BookmarksPanel(): JSX.Element | null {
       <aside className="absolute right-0 top-0 bottom-0 w-[420px] bg-neutral-950 border-l border-neutral-800 flex flex-col shadow-2xl">
         <div className="px-3 py-2 border-b border-neutral-800 flex items-center gap-2">
           <span className="font-semibold text-neutral-200 text-sm flex-1">
-            🔖 북마크
+            🔖 Bookmarks
             <span className="ml-2 text-[11px] text-neutral-500">
-              {list.length}건
+              {list.length}
             </span>
           </span>
           <button
             onClick={() => void doExport()}
             disabled={list.length === 0}
             className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 disabled:opacity-40"
-            title="Markdown 으로 내보내기"
+            title="Export as Markdown"
           >
             ↑ Export
           </button>
@@ -137,13 +137,13 @@ export function BookmarksPanel(): JSX.Element | null {
                 }}
                 className="text-[11px] px-2 py-0.5 rounded bg-red-900/60 hover:bg-red-800/70 text-red-300"
               >
-                비우기 확인
+                Confirm Clear
               </button>
               <button
                 onClick={() => setConfirmClear(false)}
                 className="text-[11px] px-2 py-0.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-400"
               >
-                취소
+                Cancel
               </button>
             </>
           ) : (
@@ -173,9 +173,9 @@ export function BookmarksPanel(): JSX.Element | null {
           {list.length === 0 && (
             <div className="p-6 text-center text-sm text-neutral-500 space-y-2">
               <div className="text-2xl">🔖</div>
-              <div>아직 북마크가 없습니다</div>
+              <div>No bookmarks yet</div>
               <div className="text-[11px]">
-                로그 선택 후 <kbd className="px-1 border border-neutral-700 rounded text-[10px]">⌘B</kbd> 로 저장하세요
+                Select log lines and press <kbd className="px-1 border border-neutral-700 rounded text-[10px]">⌘B</kbd> to save
               </div>
             </div>
           )}
@@ -202,7 +202,7 @@ export function BookmarksPanel(): JSX.Element | null {
                 <button
                   onClick={() => void remove(bm.id)}
                   className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-red-400 text-sm shrink-0"
-                  title="삭제"
+                  title="Delete"
                 >
                   ×
                 </button>
